@@ -6,34 +6,36 @@ import {
   Inject,
   PLATFORM_ID,
   NgZone,
+  EventEmitter,
+  Output,
+  Input,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import * as THREE from 'three';
-
-interface SceneObject {
-  mesh: THREE.Mesh;
-  type: 'cube' | 'sphere';
-}
+import { ScenarioModel } from '../../models/scenario.model';
+import { EmitterEntity } from '../../models/emitter.model';
+import { ListenerEntity } from '../../models/listener.model';
 
 @Component({
-  selector: 'app-scene',
-  templateUrl: './scene.html',
-  styleUrls: ['./scene.scss'],
+  selector: 'app-scene-builder',
+  templateUrl: './scene-builder.html',
+  styleUrls: ['./scene-builder.scss'],
   standalone: true,
 })
-export class Scene implements AfterViewInit {
+export class SceneBuilder implements AfterViewInit {
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef<HTMLCanvasElement> | null = null;
+
+  @Input() scenario: ScenarioModel | null = null;
+  @Output() scenarioChange = new EventEmitter<ScenarioModel>();
 
   private scene: THREE.Scene | null = null;
   private camera: THREE.PerspectiveCamera | null = null;
   private renderer: THREE.WebGLRenderer | null = null;
   private raycaster = new THREE.Raycaster();
 
-  private objects: SceneObject[] = [];
-
-  private preObjectPosition: THREE.Vector3 | null = null;
   private preObjectMesh: THREE.Mesh | null = null;
-  private selectedObject: THREE.Mesh | null = null;
+  private selectedMesh: THREE.Mesh | null = null;
+  private preObjectPosition: THREE.Vector3 | null = null;
 
   private isDragging = false;
   private isMouseDown = false;
@@ -45,13 +47,27 @@ export class Scene implements AfterViewInit {
 
   private ground: THREE.Mesh | null = null;
 
+  private internalScenario: ScenarioModel = {
+    name: 'New Scenario',
+    emitters: [],
+    listeners: [],
+  };
+
+  private nextId = 1;
+  private generateId(): string {
+    return (this.nextId++).toString();
+  }
+
+  private emitterMeshes: Map<string, THREE.Mesh> = new Map();
+  private listenerMeshes: Map<string, THREE.Mesh> = new Map();
+
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private ngZone: NgZone,
   ) { }
 
   ngAfterViewInit(): void {
-    if (!isPlatformBrowser(this.platformId) || !this.canvasRef) {return;}
+    if (!isPlatformBrowser(this.platformId) || !this.canvasRef) return;
 
     const canvas = this.canvasRef.nativeElement;
     const width = canvas.clientWidth;
@@ -82,12 +98,42 @@ export class Scene implements AfterViewInit {
 
     window.addEventListener('resize', () => this.onResize(canvas));
 
+    if (this.scenario) this.loadScenario();
+
     this.ngZone.runOutsideAngular(() => this.animate());
+  }
+
+  private loadScenario() {
+    if (!this.scene || !this.scenario) return;
+
+    this.emitterMeshes.forEach((mesh) => this.scene?.remove(mesh));
+    this.listenerMeshes.forEach((mesh) => this.scene?.remove(mesh));
+    this.emitterMeshes.clear();
+    this.listenerMeshes.clear();
+
+    this.scenario.emitters.forEach((e) => {
+      const geom = new THREE.BoxGeometry(1, 1, 1);
+      const mat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.position.set(e.position.x, e.position.y, e.position.z);
+      this.scene?.add(mesh);
+      this.emitterMeshes.set(e.id, mesh);
+    });
+
+    this.scenario.listeners.forEach((l) => {
+      const geom = new THREE.SphereGeometry(0.5, 32, 32);
+      const mat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.position.set(l.position.x, l.position.y, l.position.z);
+      this.scene?.add(mesh);
+      this.listenerMeshes.set(l.id, mesh);
+    });
+
+    this.internalScenario = { ...this.scenario };
   }
 
   private updateCamera() {
     if (!this.camera) return;
-
     this.camera.position.x = this.cameraRadius * Math.sin(this.yaw) * Math.cos(this.pitch);
     this.camera.position.y = this.cameraRadius * Math.sin(this.pitch);
     this.camera.position.z = this.cameraRadius * Math.cos(this.yaw) * Math.cos(this.pitch);
@@ -114,7 +160,6 @@ export class Scene implements AfterViewInit {
   private onMouseMove(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-
     if (!this.isMouseDown || !this.camera) return;
 
     const deltaX = event.clientX - this.dragStart.x;
@@ -157,23 +202,21 @@ export class Scene implements AfterViewInit {
     event.preventDefault();
     event.stopPropagation();
     if (this.isDragging) return;
-
     if (!this.camera || !this.scene || !this.ground) return;
 
     const normalizedMouse = this.getNormalizedMouse(event);
     this.raycaster.setFromCamera(normalizedMouse, this.camera);
 
-    // Check existing objects
-    const intersects = this.raycaster.intersectObjects(this.objects.map((o) => o.mesh));
+    const allMeshes = [...this.emitterMeshes.values(), ...this.listenerMeshes.values()];
+    const intersects = this.raycaster.intersectObjects(allMeshes);
     if (intersects.length > 0) {
-      this.selectedObject = intersects[0].object as THREE.Mesh;
+      this.selectedMesh = intersects[0].object as THREE.Mesh;
       if (this.preObjectMesh && this.scene) this.scene.remove(this.preObjectMesh);
       this.preObjectMesh = null;
       this.preObjectPosition = null;
       return;
     }
 
-    // Clicked empty space → pre-object
     const groundIntersect = this.raycaster.intersectObject(this.ground);
     if (groundIntersect.length > 0) {
       const point = groundIntersect[0].point.clone();
@@ -182,49 +225,81 @@ export class Scene implements AfterViewInit {
 
       if (this.preObjectMesh && this.scene) this.scene.remove(this.preObjectMesh);
       const geom = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        opacity: 0.5,
-        transparent: true,
-      });
-      this.preObjectMesh = new THREE.Mesh(geom, material);
+      const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+      this.preObjectMesh = new THREE.Mesh(geom, mat);
       this.preObjectMesh.position.copy(point);
       this.scene.add(this.preObjectMesh);
 
-      this.selectedObject = null;
+      this.selectedMesh = null;
     }
   }
 
-  public createCube() {
-    this.createObject('cube');
-  }
-
-  public createSphere() {
-    this.createObject('sphere');
-  }
-
-  private createObject(type: 'cube' | 'sphere') {
+  public addEmitter() {
     if (!this.preObjectPosition || !this.scene) return;
+    const id = this.generateId();
+    const emitter: EmitterEntity = { id, position: { ...this.preObjectPosition } };
+    this.internalScenario.emitters.push(emitter);
 
-    const geom =
-      type === 'cube' ? new THREE.BoxGeometry(1, 1, 1) : new THREE.SphereGeometry(0.5, 32, 32);
-    const color = type === 'cube' ? 0xff0000 : 0x0000ff;
-    const material = new THREE.MeshBasicMaterial({ color });
-    const mesh = new THREE.Mesh(geom, material);
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const mesh = new THREE.Mesh(geometry, material);
     mesh.position.copy(this.preObjectPosition);
     this.scene.add(mesh);
-    this.objects.push({ mesh, type });
+    this.emitterMeshes.set(id, mesh);
 
-    if (this.preObjectMesh && this.scene) this.scene.remove(this.preObjectMesh);
+    this.scenarioChange.emit(this.internalScenario);
+
+    if (this.preObjectMesh) this.scene.remove(this.preObjectMesh);
     this.preObjectMesh = null;
     this.preObjectPosition = null;
   }
 
-  public deleteObject() {
-    if (!this.selectedObject || !this.scene) return;
-    this.scene.remove(this.selectedObject);
-    this.objects = this.objects.filter((o) => o.mesh !== this.selectedObject);
-    this.selectedObject = null;
+  public addListener() {
+    if (!this.preObjectPosition || !this.scene) return;
+    const id = this.generateId();
+    const listener: ListenerEntity = { id, position: { ...this.preObjectPosition } };
+    this.internalScenario.listeners.push(listener);
+
+    const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.copy(this.preObjectPosition);
+    this.scene.add(mesh);
+    this.listenerMeshes.set(id, mesh);
+
+    this.scenarioChange.emit(this.internalScenario);
+
+    if (this.preObjectMesh) this.scene.remove(this.preObjectMesh);
+    this.preObjectMesh = null;
+    this.preObjectPosition = null;
+  }
+
+  public deleteSelected() {
+    if (!this.selectedMesh || !this.scene) return;
+
+    for (const [id, mesh] of this.emitterMeshes) {
+      if (mesh === this.selectedMesh) {
+        this.scene.remove(mesh);
+        this.emitterMeshes.delete(id);
+        this.internalScenario.emitters = this.internalScenario.emitters.filter((e) => e.id !== id);
+        this.selectedMesh = null;
+        this.scenarioChange.emit(this.internalScenario);
+        return;
+      }
+    }
+
+    for (const [id, mesh] of this.listenerMeshes) {
+      if (mesh === this.selectedMesh) {
+        this.scene.remove(mesh);
+        this.listenerMeshes.delete(id);
+        this.internalScenario.listeners = this.internalScenario.listeners.filter(
+          (l) => l.id !== id,
+        );
+        this.selectedMesh = null;
+        this.scenarioChange.emit(this.internalScenario);
+        return;
+      }
+    }
   }
 
   private animate = () => {
