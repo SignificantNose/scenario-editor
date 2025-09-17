@@ -64,22 +64,21 @@ export class SceneBuilder implements AfterViewInit {
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private ngZone: NgZone,
-  ) { }
+  ) {}
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId) || !this.canvasRef) return;
 
     const canvas = this.canvasRef.nativeElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xeeeeee);
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100);
+
+    this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 100);
     this.updateCamera();
 
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    this.renderer.setSize(width, height);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
 
     this.scene.add(new THREE.GridHelper(100, 100));
 
@@ -89,6 +88,7 @@ export class SceneBuilder implements AfterViewInit {
     this.ground.rotation.x = -Math.PI / 2;
     this.scene.add(this.ground);
 
+    // event listeners
     canvas.addEventListener('mousedown', (e) => this.onMouseDown(e), { passive: false });
     canvas.addEventListener('mousemove', (e) => this.onMouseMove(e), { passive: false });
     canvas.addEventListener('mouseup', (e) => this.onMouseUp(e), { passive: false });
@@ -96,7 +96,7 @@ export class SceneBuilder implements AfterViewInit {
     canvas.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
     canvas.addEventListener('click', (e) => this.onClick(e));
 
-    window.addEventListener('resize', () => this.onResize(canvas));
+    window.addEventListener('resize', () => this.onResize());
 
     if (this.scenario) this.loadScenario();
 
@@ -303,17 +303,26 @@ export class SceneBuilder implements AfterViewInit {
   }
 
   private animate = () => {
-    if (!this.renderer || !this.scene || !this.camera) return;
+    if (!this.renderer || !this.scene || !this.camera || !this.canvasRef) return;
     requestAnimationFrame(this.animate);
+
+    const canvas = this.canvasRef.nativeElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (canvas.width !== width || canvas.height !== height) {
+      this.onResize();
+    }
+
     this.renderer.render(this.scene, this.camera);
   };
 
-  private onResize(canvas: HTMLCanvasElement) {
-    if (!this.camera || !this.renderer) return;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
-  }
+private onResize() {
+  if (!this.camera || !this.renderer || !this.canvasRef) return;
+  const canvas = this.canvasRef.nativeElement;
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  this.camera.aspect = width / height;
+  this.camera.updateProjectionMatrix();
+  this.renderer.setSize(width, height);
+}
 }

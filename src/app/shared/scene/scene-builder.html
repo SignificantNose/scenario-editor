@@ -1,7 +1,10 @@
-<div class="toolbar">
-  <button (click)="addEmitter()">Add Emitter</button>
-  <button (click)="addListener()">Add Listener</button>
-  <button (click)="deleteSelected()">Delete Selected</button>
+<div class="scene-builder-container">
+  <canvas #canvas class="scene-canvas"></canvas>
+
+  <div class="toolbar">
+    <button class="toolbar-btn" (click)="addEmitter()">Add Emitter</button>
+    <button class="toolbar-btn" (click)="addListener()">Add Listener</button>
+    <button class="toolbar-btn danger" (click)="deleteSelected()">Delete Selected</button>
+  </div>
 </div>
 
-<canvas #canvas class="scene-canvas"></canvas>
