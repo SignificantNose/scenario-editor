@@ -12,9 +12,9 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import * as THREE from 'three';
-import { ScenarioModel } from '../../models/scenario.model';
-import { EmitterEntity } from '../../models/emitter.model';
-import { ListenerEntity } from '../../models/listener.model';
+import { ScenarioModel } from '@models/scenario.model';
+import { EmitterEntity } from '@models/emitter.model';
+import { ListenerEntity } from '@models/listener.model';
 
 @Component({
   selector: 'app-scene-builder',

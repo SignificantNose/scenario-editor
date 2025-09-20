@@ -1,0 +1,18 @@
+<div class="scenario-list-header">
+  <span class="scenario-list-title">Scenarios</span>
+  <button class="btn-primary" (click)="createScenario()">Create Scenario</button>
+</div>
+
+<div class="scenario-list">
+  <div class="scenario-card" *ngFor="let scenario of scenarios">
+    <div class="scenario-info">
+      <div class="scenario-name">{{ scenario.name }}</div>
+      <div class="scenario-date">{{ scenario.createdAt }}</div>
+    </div>
+    <div class="scenario-actions">
+      <button class="btn-edit" (click)="editScenario(scenario.id)">Edit</button>
+      <button class="btn-delete" (click)="deleteScenario(scenario.id)">Delete</button>
+    </div>
+  </div>
+</div>
+

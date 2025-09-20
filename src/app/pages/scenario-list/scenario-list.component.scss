@@ -1,0 +1,94 @@
+.scenario-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  .scenario-list-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text-primary, #ECEFF4);
+  }
+
+  .btn-primary {
+    background-color: #5E81AC;
+    color: var(--text-primary, #ECEFF4);
+    border: none;
+    border-radius: var(--border-radius, 6px);
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #81A1C1;
+    }
+  }
+}
+
+.scenario-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.scenario-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-card, #434C5E);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius, 8px);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.2));
+  transition: background-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background-color: var(--bg-light, #4C566A);
+    transform: translateY(-2px);
+  }
+}
+
+.scenario-info {
+  display: flex;
+  flex-direction: column;
+
+  .scenario-name {
+    font-weight: 500;
+    color: var(--text-primary, #ECEFF4);
+  }
+
+  .scenario-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary-light, #D8DEE9);
+  }
+}
+
+.scenario-actions {
+  display: flex;
+  gap: 0.5rem;
+
+  button {
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius, 6px);
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    color: var(--text-primary, #ECEFF4);
+    transition: all 0.2s ease;
+  }
+
+  .btn-edit {
+    background-color: #88C0D0;
+
+    &:hover {
+      background-color: #81A1C1;
+    }
+  }
+
+  .btn-delete {
+    background-color: #BF616A;
+
+    &:hover {
+      background-color: #A5424D;
+    }
+  }
+}
