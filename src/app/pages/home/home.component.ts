@@ -12,10 +12,10 @@ interface Scenario {
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './home.html',
-  styleUrls: ['./home.scss'],
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
 })
-export class Home {
+export class HomeComponent {
   scenarios: Scenario[] = [
     { id: '1', name: 'Scenario One', createdAt: '2025-09-17' },
     { id: '2', name: 'Scenario Two', createdAt: '2025-09-16' },

@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Home } from './pages/home/home';
-import { Editor } from './pages/editor/editor';
+import { HomeComponent } from './pages/home/home.component';
+import { EditorComponent } from './pages/editor/editor.component';
 
 export const routes = [
-  { path: '', component: Home },
-  { path: 'editor/new', component: Editor },
-  { path: 'editor/:id', component: Editor },
+  { path: '', component: HomeComponent },
+  { path: 'editor/new', component: EditorComponent },
+  { path: 'editor/:id', component: EditorComponent },
   { path: '**', redirectTo: '' }
 ];
 

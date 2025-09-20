@@ -4,7 +4,9 @@
   "newProjectRoot": "projects",
   "schematics": {
     "@schematics/angular:component": {
+      "type": "component",
       "skipTests": true,
+      "standalone": true,
       "style": "scss"
     }
   },

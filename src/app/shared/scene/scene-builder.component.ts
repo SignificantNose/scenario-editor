@@ -18,11 +18,11 @@ import { ListenerEntity } from '../../models/listener.model';
 
 @Component({
   selector: 'app-scene-builder',
-  templateUrl: './scene-builder.html',
-  styleUrls: ['./scene-builder.scss'],
+  templateUrl: './scene-builder.component.html',
+  styleUrls: ['./scene-builder.component.scss'],
   standalone: true,
 })
-export class SceneBuilder implements AfterViewInit {
+export class SceneBuilderComponent implements AfterViewInit {
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef<HTMLCanvasElement> | null = null;
 
   @Input() scenario: ScenarioModel | null = null;

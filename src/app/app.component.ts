@@ -4,9 +4,9 @@ import { RouterOutlet, RouterModule } from '@angular/router';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterModule],
-  templateUrl: './app.html',
-  styleUrls: ['./app.scss']
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
-export class App {
+export class AppComponent {
   protected readonly title = signal('Scenar.io');
 }
