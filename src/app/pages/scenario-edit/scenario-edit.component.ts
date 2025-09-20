@@ -3,13 +3,22 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ScenarioDesignerComponent } from '@shared/scenario-designer/scenario-designer.component';
 import { ScenarioModel } from '@models/scenario.model';
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-scenario-edit',
   templateUrl: './scenario-edit.component.html',
   styleUrls: ['./scenario-edit.component.scss'],
   standalone: true,
-  imports: [CommonModule, ScenarioDesignerComponent],
+  imports: [CommonModule, ScenarioDesignerComponent,
+    MatButtonModule,
+    MatToolbarModule,
+    MatIconModule,
+    MatInputModule
+  ],
 })
 export class ScenarioEditComponent {
   exampleScenario: ScenarioModel = {

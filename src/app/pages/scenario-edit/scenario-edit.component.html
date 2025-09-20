@@ -1,13 +1,12 @@
 <div class="editor-container">
-  <div class="editor-header">
-    <h2 class="editor-title">Edit Scenario</h2>
-    <div class="editor-actions">
-      <button class="btn-cancel" (click)="cancel()">Cancel</button>
-      <button class="btn-save" (click)="saveChanges()">Save Changes</button>
-    </div>
-  </div>
+  <mat-toolbar color="primary" class="editor-header">
+    <span class="editor-title">Edit Scenario</span>
+    <span class="spacer"></span>
+    <button mat-stroked-button color="accent" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="accent" (click)="saveChanges()">Save Changes</button>
+  </mat-toolbar>
 
   <div class="editor-main">
-    <app-scenario-designer class="designer" [scenario]="exampleScenario"></app-scenario-designer>
+    <app-scenario-designer class="designer"></app-scenario-designer>
   </div>
 </div>

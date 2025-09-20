@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 interface Scenario {
   id: string;
@@ -11,7 +15,7 @@ interface Scenario {
 @Component({
   selector: 'app-scenario-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatToolbarModule, MatCardModule, MatIconModule, MatButtonModule],
   templateUrl: './scenario-list.component.html',
   styleUrls: ['./scenario-list.component.scss'],
 })
@@ -37,7 +41,6 @@ export class ScenarioListComponent implements OnInit {
   }
 
   deleteScenario(id: string) {
-    this.scenarios = this.scenarios.filter(s => s.id !== id);
+    this.scenarios = this.scenarios.filter((s) => s.id !== id);
   }
 }
-
