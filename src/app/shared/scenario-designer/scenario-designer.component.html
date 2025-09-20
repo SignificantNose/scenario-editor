@@ -1,9 +1,28 @@
 <div class="scenario-designer-container">
   <canvas #canvas class="scenario-canvas"></canvas>
 
-  <div class="toolbar">
-    <button class="toolbar-btn" (click)="addEmitter()">Add Emitter</button>
-    <button class="toolbar-btn" (click)="addListener()">Add Listener</button>
-    <button class="toolbar-btn danger" (click)="deleteSelected()">Delete Selected</button>
-  </div>
+  <mat-card class="scenario-toolbar">
+    <form [formGroup]="form">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Scenario Name</mat-label>
+        <input matInput formControlName="name" required />
+        @if (form.controls['name'].hasError('required') && form.controls['name'].touched) {
+          <mat-error>
+            Name is required
+          </mat-error>
+        }
+        @if (form.controls['name'].hasError('pattern') && form.controls['name'].touched) {
+          <mat-error>
+            Invalid name format
+          </mat-error>
+        }
+      </mat-form-field>
+    </form>
+
+    <div class="toolbar-actions">
+      <button mat-stroked-button color="primary" (click)="addEmitter()">Add Emitter</button>
+      <button mat-stroked-button color="accent" (click)="addListener()">Add Listener</button>
+      <button mat-stroked-button color="warn" (click)="deleteSelected()">Delete Selected</button>
+    </div>
+  </mat-card>
 </div>

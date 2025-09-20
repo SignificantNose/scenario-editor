@@ -15,11 +15,25 @@ import * as THREE from 'three';
 import { ScenarioModel } from '@models/scenario.model';
 import { EmitterEntity } from '@models/emitter.model';
 import { ListenerEntity } from '@models/listener.model';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { ScenarioNameRegex } from '@core/const/app.defaults';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-scenario-designer',
   templateUrl: './scenario-designer.component.html',
   styleUrls: ['./scenario-designer.component.scss'],
+  imports: [MatCardModule, MatFormFieldModule, MatInputModule, ReactiveFormsModule, FormsModule, MatButtonModule],
   standalone: true,
 })
 export class ScenarioDesignerComponent implements AfterViewInit {
@@ -27,6 +41,17 @@ export class ScenarioDesignerComponent implements AfterViewInit {
 
   @Input() scenario: ScenarioModel | null = null;
   @Output() scenarioChange = new EventEmitter<ScenarioModel>();
+
+  form = new FormGroup({
+    name: new FormControl<string | null>(null, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.pattern(ScenarioNameRegex)],
+    }),
+  });
+
+  get isValid(): boolean {
+    return this.form.valid;
+  }
 
   private scene: THREE.Scene | null = null;
   private camera: THREE.PerspectiveCamera | null = null;
@@ -59,8 +84,7 @@ export class ScenarioDesignerComponent implements AfterViewInit {
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private ngZone: NgZone,
-  ) { }
-
+  ) {}
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId) || !this.canvasRef) return;
 
@@ -83,20 +107,33 @@ export class ScenarioDesignerComponent implements AfterViewInit {
     this.ground.rotation.x = -Math.PI / 2;
     this.scene.add(this.ground);
 
-    // event listeners
     canvas.addEventListener('mousedown', (e) => this.onMouseDown(e), { passive: false });
     canvas.addEventListener('mousemove', (e) => this.onMouseMove(e), { passive: false });
     canvas.addEventListener('mouseup', (e) => this.onMouseUp(e), { passive: false });
     canvas.addEventListener('mouseleave', (e) => this.onMouseUp(e), { passive: false });
     canvas.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
     canvas.addEventListener('click', (e) => this.onClick(e));
-
     window.addEventListener('resize', () => this.onResize());
 
-    if (this.scenario) this.loadScenario();
+    if (this.scenario) {
+      this.loadScenario();
+      this.form.patchValue({ name: this.scenario.name });
+    }
 
     this.ngZone.runOutsideAngular(() => this.animate());
   }
+
+  onSubmit() {
+    if (!this.form.value || !this.scenario) {
+      return;
+    }
+    const { name } = this.form.value;
+    if (!name) {
+      return;
+    }
+    this.scenario.name = name;
+  }
+
   private loadScenario() {
     if (!this.scene || !this.scenario) return;
 
