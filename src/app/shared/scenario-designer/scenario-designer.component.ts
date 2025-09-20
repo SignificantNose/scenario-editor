@@ -17,12 +17,12 @@ import { EmitterEntity } from '@models/emitter.model';
 import { ListenerEntity } from '@models/listener.model';
 
 @Component({
-  selector: 'app-scene-builder',
-  templateUrl: './scene-builder.component.html',
-  styleUrls: ['./scene-builder.component.scss'],
+  selector: 'app-scenario-designer',
+  templateUrl: './scenario-designer.component.html',
+  styleUrls: ['./scenario-designer.component.scss'],
   standalone: true,
 })
-export class SceneBuilderComponent implements AfterViewInit {
+export class ScenarioDesignerComponent implements AfterViewInit {
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef<HTMLCanvasElement> | null = null;
 
   @Input() scenario: ScenarioModel | null = null;
@@ -44,7 +44,6 @@ export class SceneBuilderComponent implements AfterViewInit {
   private yaw = 0;
   private pitch = 0;
   private cameraRadius = 15;
-
   private ground: THREE.Mesh | null = null;
 
   private internalScenario: ScenarioModel = {
@@ -54,17 +53,13 @@ export class SceneBuilderComponent implements AfterViewInit {
   };
 
   private nextId = 1;
-  private generateId(): string {
-    return (this.nextId++).toString();
-  }
-
   private emitterMeshes: Map<string, THREE.Mesh> = new Map();
   private listenerMeshes: Map<string, THREE.Mesh> = new Map();
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private ngZone: NgZone,
-  ) {}
+  ) { }
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId) || !this.canvasRef) return;
@@ -102,7 +97,6 @@ export class SceneBuilderComponent implements AfterViewInit {
 
     this.ngZone.runOutsideAngular(() => this.animate());
   }
-
   private loadScenario() {
     if (!this.scene || !this.scenario) return;
 
@@ -316,13 +310,17 @@ export class SceneBuilderComponent implements AfterViewInit {
     this.renderer.render(this.scene, this.camera);
   };
 
-private onResize() {
-  if (!this.camera || !this.renderer || !this.canvasRef) return;
-  const canvas = this.canvasRef.nativeElement;
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  this.camera.aspect = width / height;
-  this.camera.updateProjectionMatrix();
-  this.renderer.setSize(width, height);
-}
+  private onResize() {
+    if (!this.camera || !this.renderer || !this.canvasRef) return;
+    const canvas = this.canvasRef.nativeElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
+  }
+
+  private generateId(): string {
+    return (this.nextId++).toString();
+  }
 }
