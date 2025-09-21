@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ScenarioDesignerComponent } from '@shared/scenario-designer/scenario-designer.component';
@@ -13,14 +13,18 @@ import { MatInputModule } from '@angular/material/input';
   templateUrl: './scenario-edit.component.html',
   styleUrls: ['./scenario-edit.component.scss'],
   standalone: true,
-  imports: [CommonModule, ScenarioDesignerComponent,
+  imports: [
+    CommonModule,
+    ScenarioDesignerComponent,
     MatButtonModule,
     MatToolbarModule,
     MatIconModule,
-    MatInputModule
+    MatInputModule,
   ],
 })
 export class ScenarioEditComponent {
+  @ViewChild('designer') scenarioDesigner: ScenarioDesignerComponent | null = null;
+
   exampleScenario: ScenarioModel = {
     id: '1',
     name: 'aslkndf',
@@ -28,32 +32,31 @@ export class ScenarioEditComponent {
     emitters: [
       {
         id: '1',
-        position: {
-          x: 1,
-          y: 1,
-          z: 1,
-        },
+        position: { x: 1, y: 1, z: 1 },
       },
     ],
     listeners: [
       {
         id: '1',
-        position: {
-          x: 2,
-          y: 3,
-          z: 1,
-        },
+        position: { x: 2, y: 3, z: 1 },
       },
     ],
   };
-  constructor(private router: Router) { }
+
+  constructor(private router: Router) {}
 
   cancel() {
     this.router.navigate(['/']);
   }
 
   saveChanges() {
-    console.log('Scenario changes saved');
+    if (!this.scenarioDesigner || !this.scenarioDesigner.isValid) {
+      console.warn('Form invalid, cannot save changes.');
+      return;
+    }
+
+    const updatedScenario = this.scenarioDesigner.getScenario();
+    console.log('Scenario changes saved:', updatedScenario);
     this.router.navigate(['/']);
   }
 }

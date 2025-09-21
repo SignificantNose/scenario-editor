@@ -3,10 +3,21 @@
     <span class="editor-title">Edit Scenario</span>
     <span class="spacer"></span>
     <button mat-stroked-button color="accent" (click)="cancel()">Cancel</button>
-    <button mat-flat-button color="accent" (click)="saveChanges()">Save Changes</button>
+    <button
+      mat-flat-button
+      color="accent"
+      [disabled]="!scenarioDesigner?.isValid"
+      (click)="saveChanges()"
+    >
+      Save Changes
+    </button>
   </mat-toolbar>
 
   <div class="editor-main">
-    <app-scenario-designer class="designer"></app-scenario-designer>
+    <app-scenario-designer
+      class="designer"
+      [scenario]="exampleScenario"
+      #designer
+    ></app-scenario-designer>
   </div>
 </div>

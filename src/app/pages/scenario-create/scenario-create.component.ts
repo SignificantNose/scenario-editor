@@ -18,7 +18,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
   ],
 })
 export class ScenarioCreateComponent {
-  @ViewChild('designer') scenarioDesigner!: ScenarioDesignerComponent;
+  @ViewChild('designer') scenarioDesigner: ScenarioDesignerComponent | null = null;
 
   constructor(private router: Router) {}
 
@@ -27,7 +27,7 @@ export class ScenarioCreateComponent {
   }
 
   create() {
-    if (!this.scenarioDesigner.form.valid) {
+    if (!this.scenarioDesigner || !this.scenarioDesigner.form.valid) {
       console.warn('Scenario designer form is invalid.');
       return;
     }
