@@ -7,14 +7,10 @@
         <mat-label>Scenario Name</mat-label>
         <input matInput formControlName="name" required />
         @if (form.controls['name'].hasError('required') && form.controls['name'].touched) {
-          <mat-error>
-            Name is required
-          </mat-error>
+          <mat-error> Name is required </mat-error>
         }
         @if (form.controls['name'].hasError('pattern') && form.controls['name'].touched) {
-          <mat-error>
-            Invalid name format
-          </mat-error>
+          <mat-error> Invalid name format </mat-error>
         }
       </mat-form-field>
     </form>

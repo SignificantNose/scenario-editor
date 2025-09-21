@@ -1,0 +1,37 @@
+.create-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.create-header {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.create-title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.create-main {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.designer {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
