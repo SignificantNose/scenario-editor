@@ -1,46 +1,69 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-
-interface Scenario {
-  id: string;
-  name: string;
-  createdAt: string;
-}
+import { ScenarioService } from '@services/scenario.service';
+import { ScenarioData } from '@models/scenario/list-scenario-data.model';
 
 @Component({
   selector: 'app-scenario-list',
   standalone: true,
-  imports: [CommonModule, MatToolbarModule, MatCardModule, MatIconModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MatToolbarModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
   templateUrl: './scenario-list.component.html',
   styleUrls: ['./scenario-list.component.scss'],
 })
-export class ScenarioListComponent implements OnInit {
-  scenarios: Scenario[] = [];
+export class ScenarioListComponent {
+  private router = inject(Router);
+  private api = inject(ScenarioService);
 
-  constructor(private router: Router) {}
+  scenarios: ScenarioData[] = [];
+  loading = true;
+  error = '';
 
   ngOnInit() {
-    // later you’ll fetch from API/DB
-    this.scenarios = [
-      { id: '1', name: 'Scenario One', createdAt: '2025-09-17' },
-      { id: '2', name: 'Scenario Two', createdAt: '2025-09-16' },
-    ];
+    this.fetch();
+  }
+
+  private fetch() {
+    this.loading = true;
+    this.api.list().subscribe({
+      next: (rows) => {
+        this.scenarios = rows;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err?.error?.error || 'Failed to load scenarios';
+        this.loading = false;
+      },
+    });
   }
 
   createScenario() {
     this.router.navigate(['/editor/new']);
   }
 
-  editScenario(id: string) {
+  editScenario(id: number) {
     this.router.navigate([`/editor/${id}`]);
   }
 
-  deleteScenario(id: string) {
-    this.scenarios = this.scenarios.filter((s) => s.id !== id);
+  deleteScenario(id: number) {
+    this.api.delete({ id }).subscribe({
+      next: () => {
+        this.scenarios = this.scenarios.filter((s) => s.id !== id);
+      },
+      error: (err) => {
+        this.error = err?.error?.error || 'Failed to delete scenario';
+      },
+    });
   }
 }

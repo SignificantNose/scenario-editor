@@ -2,11 +2,11 @@ import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ScenarioDesignerComponent } from '@shared/scenario-designer/scenario-designer.component';
-import { ScenarioModel } from '@models/scenario.model';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { ScenarioData } from '@models/scenario/list-scenario-data.model';
 
 @Component({
   selector: 'app-scenario-edit',
@@ -25,19 +25,20 @@ import { MatInputModule } from '@angular/material/input';
 export class ScenarioEditComponent {
   @ViewChild('designer') scenarioDesigner: ScenarioDesignerComponent | null = null;
 
-  exampleScenario: ScenarioModel = {
-    id: '1',
+  exampleScenario: ScenarioData = {
+    id: 1,
     name: 'aslkndf',
     createdAt: '',
+    updatedAt: '',
     emitters: [
       {
-        id: '1',
+        id: 1,
         position: { x: 1, y: 1, z: 1 },
       },
     ],
     listeners: [
       {
-        id: '1',
+        id: 1,
         position: { x: 2, y: 3, z: 1 },
       },
     ],

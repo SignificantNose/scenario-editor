@@ -19,7 +19,8 @@
       "@models/*": ["app/core/models/*"],
       "@pages/*": ["app/pages/*"],
       "@shared/*": ["app/shared/*"],
-      "@core/*": ["app/core/*"]
+      "@core/*": ["app/core/*"],
+      "@services/*": ["app/services/*"]
     }
   },
   "angularCompilerOptions": {

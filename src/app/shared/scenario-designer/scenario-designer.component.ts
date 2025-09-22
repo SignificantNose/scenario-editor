@@ -12,9 +12,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import * as THREE from 'three';
-import { ScenarioModel } from '@models/scenario.model';
-import { EmitterEntity } from '@models/emitter.model';
-import { ListenerEntity } from '@models/listener.model';
+import { ScenarioData, EmitterData, ListenerData } from '@models/scenario/list-scenario-data.model';
 import {
   FormControl,
   FormGroup,
@@ -33,13 +31,20 @@ import { Subject, takeUntil } from 'rxjs';
   selector: 'app-scenario-designer',
   templateUrl: './scenario-designer.component.html',
   styleUrls: ['./scenario-designer.component.scss'],
-  imports: [MatCardModule, MatFormFieldModule, MatInputModule, ReactiveFormsModule, FormsModule, MatButtonModule],
+  imports: [
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatButtonModule,
+  ],
   standalone: true,
 })
 export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef<HTMLCanvasElement> | null = null;
 
-  @Input() scenario: ScenarioModel | null = null;
+  @Input() scenario: ScenarioData | null = null;
 
   form = new FormGroup({
     name: new FormControl<string | null>(null, {
@@ -49,7 +54,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   });
   isValid = false;
 
-  private $destroy = new Subject();
+  private $destroy = new Subject<void>();
 
   private scene: THREE.Scene | null = null;
   private camera: THREE.PerspectiveCamera | null = null;
@@ -69,24 +74,25 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   private cameraRadius = 15;
   private ground: THREE.Mesh | null = null;
 
-  private _internalScenario: ScenarioModel = {
+  private _internalScenario: ScenarioData = {
+    id: 0, // placeholder until backend assigns
     name: 'New Scenario',
+    createdAt: null,
+    updatedAt: null,
     emitters: [],
     listeners: [],
   };
 
   private nextId = 1;
-  private emitterMeshes: Map<string, THREE.Mesh> = new Map();
-  private listenerMeshes: Map<string, THREE.Mesh> = new Map();
+  private emitterMeshes: Map<number, THREE.Mesh> = new Map();
+  private listenerMeshes: Map<number, THREE.Mesh> = new Map();
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private ngZone: NgZone,
   ) {}
 
-  ngOnInit(){
-    // todo: error on detection change happens here,
-    // despite it being the onInit hook
+  ngOnInit() {
     if (this.scenario) {
       this.loadScenario();
       this.form.patchValue({ name: this.scenario.name });
@@ -134,11 +140,11 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   ngOnDestroy(): void {
-    this.$destroy.next(true);
+    this.$destroy.next();
     this.$destroy.complete();
   }
 
-  public getScenario(): ScenarioModel {
+  public getScenario(): ScenarioData {
     this._internalScenario.name = this.form.controls.name.value || '';
     return { ...this._internalScenario };
   }
@@ -277,7 +283,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   public addEmitter() {
     if (!this.preObjectPosition || !this.scene) return;
     const id = this.generateId();
-    const emitter: EmitterEntity = { id, position: { ...this.preObjectPosition } };
+    const emitter: EmitterData = { id, position: { ...this.preObjectPosition } };
     this._internalScenario.emitters.push(emitter);
 
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -295,7 +301,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   public addListener() {
     if (!this.preObjectPosition || !this.scene) return;
     const id = this.generateId();
-    const listener: ListenerEntity = { id, position: { ...this.preObjectPosition } };
+    const listener: ListenerData = { id, position: { ...this.preObjectPosition } };
     this._internalScenario.listeners.push(listener);
 
     const geometry = new THREE.SphereGeometry(0.5, 32, 32);
@@ -304,7 +310,6 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     mesh.position.copy(this.preObjectPosition);
     this.scene.add(mesh);
     this.listenerMeshes.set(id, mesh);
-
 
     if (this.preObjectMesh) this.scene.remove(this.preObjectMesh);
     this.preObjectMesh = null;
@@ -361,7 +366,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this.renderer.setSize(width, height);
   }
 
-  private generateId(): string {
-    return (this.nextId++).toString();
+  private generateId(): number {
+    return this.nextId++;
   }
 }

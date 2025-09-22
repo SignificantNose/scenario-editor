@@ -1,24 +1,45 @@
 <mat-toolbar class="scenario-list-header">
   <span class="scenario-list-title">Scenarios</span>
-  <button mat-raised-button color="primary" (click)="createScenario()">Create Scenario</button>
+  <button mat-raised-button color="primary" (click)="createScenario()">
+    Create Scenario
+  </button>
 </mat-toolbar>
 
-<div class="scenario-list">
+<div *ngIf="loading" class="muted">Loading...</div>
+<div *ngIf="error" class="error">{{ error }}</div>
+
+<div class="scenario-list" *ngIf="!loading && !error">
   <mat-card class="scenario-card" *ngFor="let scenario of scenarios">
     <div class="scenario-content">
       <div class="scenario-info">
         <div class="scenario-name">{{ scenario.name }}</div>
-        <div class="scenario-date">{{ scenario.createdAt | date: 'short' }}</div>
+        <div class="scenario-date">
+          {{ scenario.createdAt | date: 'short' }}
+        </div>
       </div>
 
       <div class="scenario-actions">
-        <button mat-icon-button color="primary" (click)="editScenario(scenario.id)">
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="editScenario(scenario.id)"
+        >
+          <!-- aria-label="Edit {{ scenario.name }}" -->
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button color="warn" (click)="deleteScenario(scenario.id)">
+        <button
+          mat-icon-button
+          color="warn"
+          (click)="deleteScenario(scenario.id)"
+        >
+          <!-- aria-label="Delete {{ scenario.name }}" -->
           <mat-icon>delete</mat-icon>
         </button>
       </div>
     </div>
   </mat-card>
+
+  <div *ngIf="scenarios.length === 0" class="muted">
+    No scenarios found
+  </div>
 </div>
