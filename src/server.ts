@@ -4,6 +4,7 @@ import {
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
+import apiV1 from 'api/v1/api';
 import express from 'express';
 import { join } from 'node:path';
 
@@ -11,6 +12,10 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+
+app.use(express.json())
+app.use('/api/v1', apiV1);
 
 /**
  * Example Express Rest API endpoints can be defined here.

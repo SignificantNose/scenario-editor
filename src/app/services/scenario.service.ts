@@ -1,10 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {
-  ScenarioData,
-  ListScenarioDataResponse,
-} from '@models/scenario/list-scenario-data.model';
+import { ListScenarioDataResponse, ScenarioData } from '@models/scenario/list-scenario-data.model';
 import { CreateScenarioData } from '@models/scenario/create-scenario-data.model';
 import { UpdateScenarioData } from '@models/scenario/update-scenario-data.model';
 import { DeleteScenarioData } from '@models/scenario/delete-scenario-data.model';
@@ -12,7 +9,7 @@ import { DeleteScenarioData } from '@models/scenario/delete-scenario-data.model'
 @Injectable({ providedIn: 'root' })
 export class ScenarioService {
   private http = inject(HttpClient);
-  private base = '/api/scenario';
+  private base = '/api/v1/scenario';
 
   list(q = ''): Observable<ListScenarioDataResponse> {
     const url = q ? `${this.base}?q=${encodeURIComponent(q)}` : this.base;

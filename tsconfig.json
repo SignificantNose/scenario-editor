@@ -16,10 +16,9 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@models/*": ["app/core/models/*"],
       "@pages/*": ["app/pages/*"],
       "@shared/*": ["app/shared/*"],
-      "@core/*": ["app/core/*"],
+      "@models/*": ["core/models/*"],
       "@services/*": ["app/services/*"]
     }
   },

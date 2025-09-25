@@ -20,7 +20,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ScenarioNameRegex } from '@core/const/app.defaults';
+import { ScenarioNameRegex } from 'app/const/app.defaults';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
