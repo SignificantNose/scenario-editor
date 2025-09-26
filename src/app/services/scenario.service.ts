@@ -25,7 +25,7 @@ export class ScenarioService {
   }
 
   update(id: number | string, data: UpdateScenarioData): Observable<ScenarioData> {
-    return this.http.patch<ScenarioData>(`${this.base}/${id}`, data);
+    return this.http.put<ScenarioData>(`${this.base}/${id}`, data);
   }
 
   delete(data: DeleteScenarioData): Observable<void> {

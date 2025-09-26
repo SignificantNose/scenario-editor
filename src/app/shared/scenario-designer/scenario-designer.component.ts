@@ -13,13 +13,7 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import * as THREE from 'three';
 import { ScenarioData, EmitterData, ListenerData } from '@models/scenario/list-scenario-data.model';
-import {
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ScenarioNameRegex } from 'app/const/app.defaults';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -44,7 +38,17 @@ import { Subject, takeUntil } from 'rxjs';
 export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef<HTMLCanvasElement> | null = null;
 
-  @Input() scenario: ScenarioData | null = null;
+  private _scenario: ScenarioData | null = null;
+  @Input()
+  set scenario(value: ScenarioData | null) {
+    this._scenario = value;
+    if (value) {
+      this.loadScenarioAsync(value);
+    }
+  }
+  get scenario(): ScenarioData | null {
+    return this._scenario;
+  }
 
   form = new FormGroup({
     name: new FormControl<string | null>(null, {
@@ -55,7 +59,6 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   isValid = false;
 
   private $destroy = new Subject<void>();
-
   private scene: THREE.Scene | null = null;
   private camera: THREE.PerspectiveCamera | null = null;
   private renderer: THREE.WebGLRenderer | null = null;
@@ -75,31 +78,21 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   private ground: THREE.Mesh | null = null;
 
   private _internalScenario: ScenarioData = {
-    id: 0, // placeholder until backend assigns
+    id: 0,
     name: 'New Scenario',
     createdAt: null,
     updatedAt: null,
     emitters: [],
     listeners: [],
   };
-
   private nextId = 1;
   private emitterMeshes: Map<number, THREE.Mesh> = new Map();
   private listenerMeshes: Map<number, THREE.Mesh> = new Map();
 
-  constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
-    private ngZone: NgZone,
-  ) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private ngZone: NgZone) {}
 
   ngOnInit() {
-    if (this.scenario) {
-      this.loadScenario();
-      this.form.patchValue({ name: this.scenario.name });
-    } else {
-      this.form.patchValue({ name: this._internalScenario.name });
-    }
-
+    this.form.patchValue({ name: this._internalScenario.name });
     this.isValid = this.form.valid;
     this.form.statusChanges.pipe(takeUntil(this.$destroy)).subscribe(() => {
       this.isValid = this.form.valid;
@@ -110,7 +103,6 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     if (!isPlatformBrowser(this.platformId) || !this.canvasRef) return;
 
     const canvas = this.canvasRef.nativeElement;
-
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xeeeeee);
 
@@ -136,6 +128,8 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     canvas.addEventListener('click', (e) => this.onClick(e));
     window.addEventListener('resize', () => this.onResize());
 
+    if (this._scenario) this.loadScenarioAsync(this._scenario);
+
     this.ngZone.runOutsideAngular(() => this.animate());
   }
 
@@ -149,33 +143,52 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     return { ...this._internalScenario };
   }
 
-  private loadScenario() {
-    if (!this.scene || !this.scenario) return;
+  private loadScenarioAsync(scenario: ScenarioData) {
+    // Patch form
+    this.form.patchValue({ name: scenario.name });
+
+    // Set internal scenario
+    this._internalScenario = { ...scenario };
+
+    // Set nextId to prevent collisions
+    this.nextId =
+      Math.max(
+        0,
+        ...this._internalScenario.emitters.map((e) => e.id),
+        ...this._internalScenario.listeners.map((l) => l.id)
+      ) + 1;
+
+    // Update meshes if scene exists
+    if (this.scene) this.loadMeshes();
+  }
+
+  private loadMeshes() {
+    if (!this.scene) return;
 
     this.emitterMeshes.forEach((mesh) => this.scene?.remove(mesh));
     this.listenerMeshes.forEach((mesh) => this.scene?.remove(mesh));
     this.emitterMeshes.clear();
     this.listenerMeshes.clear();
 
-    this.scenario.emitters.forEach((e) => {
-      const geom = new THREE.BoxGeometry(1, 1, 1);
-      const mat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-      const mesh = new THREE.Mesh(geom, mat);
+    this._internalScenario.emitters.forEach((e) => {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.MeshBasicMaterial({ color: 0xff0000 })
+      );
       mesh.position.set(e.position.x, e.position.y, e.position.z);
       this.scene?.add(mesh);
       this.emitterMeshes.set(e.id, mesh);
     });
 
-    this.scenario.listeners.forEach((l) => {
-      const geom = new THREE.SphereGeometry(0.5, 32, 32);
-      const mat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-      const mesh = new THREE.Mesh(geom, mat);
+    this._internalScenario.listeners.forEach((l) => {
+      const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.5, 32, 32),
+        new THREE.MeshBasicMaterial({ color: 0x0000ff })
+      );
       mesh.position.set(l.position.x, l.position.y, l.position.z);
       this.scene?.add(mesh);
       this.listenerMeshes.set(l.id, mesh);
     });
-
-    this._internalScenario = { ...this.scenario };
   }
 
   private updateCamera() {
@@ -191,7 +204,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
     return new THREE.Vector2(
       ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      -((event.clientY - rect.top) / rect.height) * 2 + 1
     );
   }
 
@@ -286,9 +299,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     const emitter: EmitterData = { id, position: { ...this.preObjectPosition } };
     this._internalScenario.emitters.push(emitter);
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
     mesh.position.copy(this.preObjectPosition);
     this.scene.add(mesh);
     this.emitterMeshes.set(id, mesh);
@@ -304,9 +315,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     const listener: ListenerData = { id, position: { ...this.preObjectPosition } };
     this._internalScenario.listeners.push(listener);
 
-    const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
     mesh.position.copy(this.preObjectPosition);
     this.scene.add(mesh);
     this.listenerMeshes.set(id, mesh);
@@ -333,13 +342,15 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
       if (mesh === this.selectedMesh) {
         this.scene.remove(mesh);
         this.listenerMeshes.delete(id);
-        this._internalScenario.listeners = this._internalScenario.listeners.filter(
-          (l) => l.id !== id,
-        );
+        this._internalScenario.listeners = this._internalScenario.listeners.filter((l) => l.id !== id);
         this.selectedMesh = null;
         return;
       }
     }
+  }
+
+  private generateId(): number {
+    return this.nextId++;
   }
 
   private animate = () => {
@@ -349,9 +360,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     const canvas = this.canvasRef.nativeElement;
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-    if (canvas.width !== width || canvas.height !== height) {
-      this.onResize();
-    }
+    if (canvas.width !== width || canvas.height !== height) this.onResize();
 
     this.renderer.render(this.scene, this.camera);
   };
@@ -359,14 +368,9 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   private onResize() {
     if (!this.camera || !this.renderer || !this.canvasRef) return;
     const canvas = this.canvasRef.nativeElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    this.camera.aspect = width / height;
+    this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
-  }
-
-  private generateId(): number {
-    return this.nextId++;
+    this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
   }
 }
+

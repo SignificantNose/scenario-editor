@@ -1,4 +1,4 @@
-<div class="editor-container">
+<div class="editor-container" *ngIf="scenario">
   <mat-toolbar color="primary" class="editor-header">
     <span class="editor-title">Edit Scenario</span>
     <span class="spacer"></span>
@@ -16,8 +16,9 @@
   <div class="editor-main">
     <app-scenario-designer
       class="designer"
-      [scenario]="exampleScenario"
+      [scenario]="scenario"
       #designer
     ></app-scenario-designer>
   </div>
 </div>
+<div *ngIf="!scenario">Loading scenario...</div>

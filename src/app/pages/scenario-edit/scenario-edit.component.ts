@@ -1,12 +1,13 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ScenarioDesignerComponent } from '@shared/scenario-designer/scenario-designer.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { ScenarioData } from '@models/scenario/list-scenario-data.model';
+import { ScenarioService } from '@services/scenario.service';
 
 @Component({
   selector: 'app-scenario-edit',
@@ -22,42 +23,58 @@ import { ScenarioData } from '@models/scenario/list-scenario-data.model';
     MatInputModule,
   ],
 })
-export class ScenarioEditComponent {
+export class ScenarioEditComponent implements OnInit {
   @ViewChild('designer') scenarioDesigner: ScenarioDesignerComponent | null = null;
 
-  exampleScenario: ScenarioData = {
-    id: 1,
-    name: 'aslkndf',
-    createdAt: '',
-    updatedAt: '',
-    emitters: [
-      {
-        id: 1,
-        position: { x: 1, y: 1, z: 1 },
-      },
-    ],
-    listeners: [
-      {
-        id: 1,
-        position: { x: 2, y: 3, z: 1 },
-      },
-    ],
-  };
+  scenario: ScenarioData | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private scenarioService: ScenarioService
+  ) {}
+
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam ? Number(idParam) : null;
+
+    if (!id) {
+      console.error('Invalid scenario id');
+      this.router.navigate(['/']);
+      return;
+    }
+
+    this.scenarioService.get(id).subscribe({
+      next: (data) => {
+        this.scenario = data;
+      },
+      error: (err) => {
+        console.error('Failed to fetch scenario:', err);
+        this.router.navigate(['/']);
+      },
+    });
+  }
 
   cancel() {
     this.router.navigate(['/']);
   }
 
   saveChanges() {
-    if (!this.scenarioDesigner || !this.scenarioDesigner.isValid) {
-      console.warn('Form invalid, cannot save changes.');
+    if (!this.scenarioDesigner || !this.scenarioDesigner.isValid || !this.scenario) {
+      console.warn('Form invalid or scenario not loaded.');
       return;
     }
 
     const updatedScenario = this.scenarioDesigner.getScenario();
-    console.log('Scenario changes saved:', updatedScenario);
-    this.router.navigate(['/']);
+
+    this.scenarioService.update(updatedScenario.id, updatedScenario).subscribe({
+      next: () => {
+        console.log('Scenario changes saved:', updatedScenario);
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        console.error('Failed to save scenario:', err);
+      },
+    });
   }
 }
