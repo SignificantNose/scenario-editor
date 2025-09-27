@@ -6,11 +6,14 @@
     <mat-toolbar color="primary" class="editor-header">
       <span class="editor-title">Edit Scenario</span>
       <span class="spacer"></span>
-      <button class="editor-button" mat-stroked-button color="accent" (click)="cancel()">Cancel</button>
+
+      <button mat-raised-button color="accent" class="editor-button" (click)="cancel()">
+        Cancel
+      </button>
       <button
-        class="editor-button"
-        mat-flat-button
+        mat-raised-button
         color="accent"
+        class="editor-button"
         [disabled]="!scenarioDesigner?.isValid"
         (click)="saveChanges()"
       >
@@ -19,7 +22,11 @@
     </mat-toolbar>
 
     <div class="editor-main">
-      <app-scenario-designer class="designer" [scenario]="scenario" #designer></app-scenario-designer>
+      <app-scenario-designer
+        class="designer"
+        [scenario]="scenario"
+        #designer
+      ></app-scenario-designer>
     </div>
   </div>
 }

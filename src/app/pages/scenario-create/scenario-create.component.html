@@ -2,11 +2,14 @@
   <mat-toolbar color="primary" class="create-header">
     <span class="create-title">Create Scenario</span>
     <span class="spacer"></span>
-    <button class="create-button" mat-stroked-button color="accent" (click)="cancel()">Cancel</button>
+
+    <button mat-raised-button color="accent" class="create-button" (click)="cancel()">
+      Cancel
+    </button>
     <button
-      class="create-button"
-      mat-flat-button
+      mat-raised-button
       color="accent"
+      class="create-button"
       [disabled]="!designer.isValid"
       (click)="create()"
     >

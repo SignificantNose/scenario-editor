@@ -3,17 +3,21 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
 }
 
 .scenario-list-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 600;
 }
 
 .filters-panel {
   margin-top: 1rem;
-  border-radius: 8px;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface);
 }
 
 .filters-form {
@@ -34,6 +38,7 @@
 .filter-title {
   font-weight: 500;
   margin-bottom: 0.25rem;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .filter-field {
@@ -55,17 +60,17 @@
 }
 
 .scenario-card {
-  width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
 .scenario-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .scenario-content {
@@ -74,23 +79,18 @@
   align-items: flex-start;
   padding: 1rem;
   height: 100%;
-  box-sizing: border-box;
-}
-
-.scenario-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
 
 .scenario-name {
   font-weight: 600;
   font-size: 1.1rem;
+  color: var(--mat-sys-on-surface);
 }
 
 .scenario-date,
 .scenario-stats {
   font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .scenario-actions {
@@ -102,11 +102,11 @@
 .muted-text {
   text-align: center;
   margin-top: 1rem;
-  color: rgba(0,0,0,0.6);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .error-text {
   text-align: center;
   margin-top: 1rem;
-  color: var(--mat-warn);
+  color: var(--mat-sys-error);
 }
