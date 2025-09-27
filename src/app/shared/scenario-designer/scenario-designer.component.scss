@@ -34,3 +34,21 @@
   flex-direction: column;
   gap: 10px;
 }
+
+.info-panel {
+  margin-top: 16px;
+  padding: 8px;
+}
+
+.info-panel-title {
+  font-size: 1.1em;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--mat-sys-primary, #3f51b5);
+}
+
+.info-panel-text {
+  font-size: 0.9em;
+  margin-bottom: 4px;
+  color: var(--mat-sys-on-surface, #333);
+}

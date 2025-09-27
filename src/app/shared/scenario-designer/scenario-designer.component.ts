@@ -13,13 +13,25 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import * as THREE from 'three';
 import { ScenarioData, EmitterData, ListenerData } from '@models/scenario/list-scenario-data.model';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ScenarioNameRegex } from 'app/const/app.defaults';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Subject, takeUntil } from 'rxjs';
+
+interface SelectedObject {
+  mesh: THREE.Mesh;
+  type: 'emitter' | 'listener';
+  data: EmitterData | ListenerData;
+}
 
 @Component({
   selector: 'app-scenario-designer',
@@ -42,9 +54,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   @Input()
   set scenario(value: ScenarioData | null) {
     this._scenario = value;
-    if (value) {
-      this.loadScenarioAsync(value);
-    }
+    if (value) this.loadScenarioAsync(value);
   }
   get scenario(): ScenarioData | null {
     return this._scenario;
@@ -65,11 +75,10 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   private raycaster = new THREE.Raycaster();
 
   private preObjectMesh: THREE.Mesh | null = null;
-  private selectedMesh: THREE.Mesh | null = null;
   private preObjectPosition: THREE.Vector3 | null = null;
-
   private isDragging = false;
   private isMouseDown = false;
+  private mouseLeftCanvas = false;
   private dragThreshold = 5;
   private dragStart = { x: 0, y: 0 };
   private yaw = 0;
@@ -89,7 +98,13 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   private emitterMeshes: Map<number, THREE.Mesh> = new Map();
   private listenerMeshes: Map<number, THREE.Mesh> = new Map();
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private ngZone: NgZone) {}
+  public selectedMesh: THREE.Mesh | null = null;
+  public selectedObject: SelectedObject | null = null;
+
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private ngZone: NgZone,
+  ) { }
 
   ngOnInit() {
     this.form.patchValue({ name: this._internalScenario.name });
@@ -112,20 +127,21 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
-    this.scene.add(new THREE.GridHelper(100, 100));
-
+    const gridHelper = new THREE.GridHelper(100, 100, 0x999999, 0xcccccc);
     const planeGeometry = new THREE.PlaneGeometry(100, 100);
     const planeMaterial = new THREE.MeshBasicMaterial({ visible: false });
     this.ground = new THREE.Mesh(planeGeometry, planeMaterial);
     this.ground.rotation.x = -Math.PI / 2;
     this.scene.add(this.ground);
+    this.scene.add(gridHelper);
 
     canvas.addEventListener('mousedown', (e) => this.onMouseDown(e), { passive: false });
     canvas.addEventListener('mousemove', (e) => this.onMouseMove(e), { passive: false });
-    canvas.addEventListener('mouseup', (e) => this.onMouseUp(e), { passive: false });
-    canvas.addEventListener('mouseleave', (e) => this.onMouseUp(e), { passive: false });
+    window.addEventListener('mouseup', (e) => this.onMouseUp(e), { passive: false });
+    canvas.addEventListener('mouseleave', (e) => this.onMouseLeave(e), { passive: false });
+    canvas.addEventListener('mouseenter', (e) => this.onMouseEnter(e), { passive: false });
     canvas.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
-    canvas.addEventListener('click', (e) => this.onClick(e));
+
     window.addEventListener('resize', () => this.onResize());
 
     if (this._scenario) this.loadScenarioAsync(this._scenario);
@@ -136,6 +152,8 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   ngOnDestroy(): void {
     this.$destroy.next();
     this.$destroy.complete();
+    window.removeEventListener('mouseup', (e) => this.onMouseUp(e));
+    window.removeEventListener('resize', () => this.onResize());
   }
 
   public getScenario(): ScenarioData {
@@ -144,21 +162,14 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private loadScenarioAsync(scenario: ScenarioData) {
-    // Patch form
     this.form.patchValue({ name: scenario.name });
-
-    // Set internal scenario
     this._internalScenario = { ...scenario };
-
-    // Set nextId to prevent collisions
     this.nextId =
       Math.max(
         0,
         ...this._internalScenario.emitters.map((e) => e.id),
-        ...this._internalScenario.listeners.map((l) => l.id)
+        ...this._internalScenario.listeners.map((l) => l.id),
       ) + 1;
-
-    // Update meshes if scene exists
     if (this.scene) this.loadMeshes();
   }
 
@@ -173,9 +184,10 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this._internalScenario.emitters.forEach((e) => {
       const mesh = new THREE.Mesh(
         new THREE.BoxGeometry(1, 1, 1),
-        new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        new THREE.MeshBasicMaterial({ color: 0xff0000 }),
       );
       mesh.position.set(e.position.x, e.position.y, e.position.z);
+      mesh.userData = { id: e.id, type: 'emitter' };
       this.scene?.add(mesh);
       this.emitterMeshes.set(e.id, mesh);
     });
@@ -183,9 +195,10 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this._internalScenario.listeners.forEach((l) => {
       const mesh = new THREE.Mesh(
         new THREE.SphereGeometry(0.5, 32, 32),
-        new THREE.MeshBasicMaterial({ color: 0x0000ff })
+        new THREE.MeshBasicMaterial({ color: 0x0000ff }),
       );
       mesh.position.set(l.position.x, l.position.y, l.position.z);
+      mesh.userData = { id: l.id, type: 'listener' };
       this.scene?.add(mesh);
       this.listenerMeshes.set(l.id, mesh);
     });
@@ -204,7 +217,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
     return new THREE.Vector2(
       ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1
+      -((event.clientY - rect.top) / rect.height) * 2 + 1,
     );
   }
 
@@ -213,13 +226,14 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     event.stopPropagation();
     this.isDragging = false;
     this.isMouseDown = true;
+    this.mouseLeftCanvas = false;
     this.dragStart = { x: event.clientX, y: event.clientY };
   }
 
   private onMouseMove(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    if (!this.isMouseDown || !this.camera) return;
+    if (!this.isMouseDown || this.mouseLeftCanvas || !this.camera) return;
 
     const deltaX = event.clientX - this.dragStart.x;
     const deltaY = event.clientY - this.dragStart.y;
@@ -241,12 +255,24 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private onMouseUp(event?: MouseEvent) {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
+    if (event) event.preventDefault();
+
+    if (!this.isDragging && this.isMouseDown && !this.mouseLeftCanvas && event) {
+      const clickedOnObject = this.handleObjectSelection(event);
+      if (!clickedOnObject) this.handleGroundClick(event);
     }
+
     this.isMouseDown = false;
     this.isDragging = false;
+    this.mouseLeftCanvas = false;
+  }
+
+  private onMouseLeave(event: MouseEvent) {
+    if (this.isMouseDown) this.mouseLeftCanvas = true;
+  }
+
+  private onMouseEnter(event: MouseEvent) {
+    this.mouseLeftCanvas = false;
   }
 
   private onWheel(event: WheelEvent) {
@@ -257,26 +283,60 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this.updateCamera();
   }
 
-  private onClick(event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (this.isDragging) return;
-    if (!this.camera || !this.scene || !this.ground) return;
+  private handleObjectSelection(event: MouseEvent): boolean {
+    if (!this.camera || !this.scene) return false;
 
     const normalizedMouse = this.getNormalizedMouse(event);
     this.raycaster.setFromCamera(normalizedMouse, this.camera);
 
     const allMeshes = [...this.emitterMeshes.values(), ...this.listenerMeshes.values()];
     const intersects = this.raycaster.intersectObjects(allMeshes);
-    if (intersects.length > 0) {
-      this.selectedMesh = intersects[0].object as THREE.Mesh;
-      if (this.preObjectMesh && this.scene) this.scene.remove(this.preObjectMesh);
-      this.preObjectMesh = null;
-      this.preObjectPosition = null;
-      return;
-    }
 
+    if (intersects.length > 0) {
+      const mesh = intersects[0].object as THREE.Mesh;
+
+      if (this.selectedMesh && this.selectedMesh !== mesh) {
+        const type = this.selectedMesh.userData['type'];
+        const color = type === 'emitter' ? 0xff0000 : 0x0000ff;
+        (this.selectedMesh.material as THREE.MeshBasicMaterial).color.set(color);
+      }
+
+      this.selectedMesh = mesh;
+      const type = mesh.userData['type'];
+      const brightColor = type === 'emitter' ? 0xff6666 : 0x6666ff;
+      (mesh.material as THREE.MeshBasicMaterial).color.set(brightColor);
+
+      const id = mesh.userData['id'];
+      const data: EmitterData | ListenerData =
+        type === 'emitter'
+          ? this._internalScenario.emitters.find((e) => e.id === id)!
+          : this._internalScenario.listeners.find((l) => l.id === id)!;
+
+      this.selectedObject = { mesh, type, data };
+      return true;
+    } else {
+      this.clearSelectedObject();
+      return false;
+    }
+  }
+
+  private clearSelectedObject() {
+    if (this.selectedMesh) {
+      const type = this.selectedMesh.userData['type'];
+      const color = type === 'emitter' ? 0xff0000 : 0x0000ff;
+      (this.selectedMesh.material as THREE.MeshBasicMaterial).color.set(color);
+    }
+    this.selectedMesh = null;
+    this.selectedObject = null;
+  }
+
+  private handleGroundClick(event: MouseEvent) {
+    if (!this.camera || !this.scene || !this.ground) return;
+
+    const normalizedMouse = this.getNormalizedMouse(event);
+    this.raycaster.setFromCamera(normalizedMouse, this.camera);
     const groundIntersect = this.raycaster.intersectObject(this.ground);
+
     if (groundIntersect.length > 0) {
       const point = groundIntersect[0].point.clone();
       point.y = 0.5;
@@ -288,19 +348,21 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
       this.preObjectMesh = new THREE.Mesh(geom, mat);
       this.preObjectMesh.position.copy(point);
       this.scene.add(this.preObjectMesh);
-
-      this.selectedMesh = null;
     }
   }
 
   public addEmitter() {
     if (!this.preObjectPosition || !this.scene) return;
     const id = this.generateId();
-    const emitter: EmitterData = { id, position: { ...this.preObjectPosition } };
+    const emitter: EmitterData = { id, position: { ...this.preObjectPosition } }; // removed file
     this._internalScenario.emitters.push(emitter);
 
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+    );
     mesh.position.copy(this.preObjectPosition);
+    mesh.userData = { id, type: 'emitter' };
     this.scene.add(mesh);
     this.emitterMeshes.set(id, mesh);
 
@@ -309,14 +371,22 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this.preObjectPosition = null;
   }
 
+  public onFileSelected(event: Event) {
+    console.log('File upload stub');
+  }
+
   public addListener() {
     if (!this.preObjectPosition || !this.scene) return;
     const id = this.generateId();
     const listener: ListenerData = { id, position: { ...this.preObjectPosition } };
     this._internalScenario.listeners.push(listener);
 
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.5, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0x0000ff }),
+    );
     mesh.position.copy(this.preObjectPosition);
+    mesh.userData = { id, type: 'listener' };
     this.scene.add(mesh);
     this.listenerMeshes.set(id, mesh);
 
@@ -326,28 +396,27 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   public deleteSelected() {
-    if (!this.selectedMesh || !this.scene) return;
+    if (!this.selectedObject || !this.scene) return;
 
-    for (const [id, mesh] of this.emitterMeshes) {
-      if (mesh === this.selectedMesh) {
-        this.scene.remove(mesh);
-        this.emitterMeshes.delete(id);
-        this._internalScenario.emitters = this._internalScenario.emitters.filter((e) => e.id !== id);
-        this.selectedMesh = null;
-        return;
-      }
+    const { mesh, type, data } = this.selectedObject;
+
+    if (type === 'emitter') {
+      this.scene.remove(mesh);
+      this.emitterMeshes.delete(data.id);
+      this._internalScenario.emitters = this._internalScenario.emitters.filter(
+        (e) => e.id !== data.id,
+      );
+    } else {
+      this.scene.remove(mesh);
+      this.listenerMeshes.delete(data.id);
+      this._internalScenario.listeners = this._internalScenario.listeners.filter(
+        (l) => l.id !== data.id,
+      );
     }
 
-    for (const [id, mesh] of this.listenerMeshes) {
-      if (mesh === this.selectedMesh) {
-        this.scene.remove(mesh);
-        this.listenerMeshes.delete(id);
-        this._internalScenario.listeners = this._internalScenario.listeners.filter((l) => l.id !== id);
-        this.selectedMesh = null;
-        return;
-      }
-    }
+    this.clearSelectedObject();
   }
+
 
   private generateId(): number {
     return this.nextId++;
@@ -373,4 +442,3 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
   }
 }
-

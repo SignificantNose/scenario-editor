@@ -18,7 +18,37 @@
     <div class="toolbar-actions">
       <button mat-stroked-button color="primary" (click)="addEmitter()">Add Emitter</button>
       <button mat-stroked-button color="accent" (click)="addListener()">Add Listener</button>
-      <button mat-stroked-button color="warn" (click)="deleteSelected()">Delete Selected</button>
     </div>
+
+    @if (selectedObject) {
+      @if (selectedObject.type === 'listener') {
+        <div class="info-panel">
+          <h3 class="info-panel-title">Selected listener</h3>
+          <p>ID: {{ selectedObject.data.id }}</p>
+          <p>
+            Position: X: {{ selectedObject.data.position.x.toFixed(2) }}, Y:
+            {{ selectedObject.data.position.y.toFixed(2) }}, Z:
+            {{ selectedObject.data.position.z.toFixed(2) }}
+          </p>
+          <button mat-stroked-button color="warn" class="full-width" (click)="deleteSelected()">
+            Delete listener
+          </button>
+        </div>
+      } @else if (selectedObject.type === 'emitter') {
+        <div class="info-panel">
+          <h3 class="info-panel-title">Selected emitter</h3>
+          <p>ID: {{ selectedObject.data.id }}</p>
+          <p>
+            Position: X: {{ selectedObject.data.position.x.toFixed(2) }}, Y:
+            {{ selectedObject.data.position.y.toFixed(2) }}, Z:
+            {{ selectedObject.data.position.z.toFixed(2) }}
+          </p>
+          <p>upload file</p>
+          <button mat-stroked-button color="warn" class="full-width" (click)="deleteSelected()">
+            Delete emitter
+          </button>
+        </div>
+      }
+    }
   </mat-card>
 </div>
