@@ -1,5 +1,8 @@
 import * as v from 'valibot';
-import { CreateScenarioDataSchema } from '@models/scenario/create-scenario-data.model';
+import {
+  CreateScenarioData,
+  CreateScenarioDataSchema,
+} from '@models/scenario/create-scenario-data.model';
 import { ScenarioFilter, ScenarioFilterSchema } from '@models/scenario/filter.model';
 import { ListScenarioDataResponse, ScenarioData } from '@models/scenario/list-scenario-data.model';
 import { UpdateScenarioDataSchema } from '@models/scenario/update-scenario-data.model';
@@ -42,16 +45,23 @@ let scenarios: ListScenarioDataResponse = [
   },
 ];
 
+let nextScenarioId = Math.max(...scenarios.map((s) => s.id)) + 1;
+
 api.post('/', validateBody(CreateScenarioDataSchema), async (req, res) => {
-  const scenario = req.body;
-  console.log('Received scenario:', scenario);
+  const now = new Date().toISOString();
+  const scenario: ScenarioData = {
+    ...req.body,
+    id: nextScenarioId++,
+    createdAt: now,
+    updatedAt: now,
+  };
   scenarios.push(scenario);
   res.status(201).json({ message: 'Scenario saved', scenario });
 });
+
 api.get('/', async (req, res) => {
   const query = req.query;
 
-  // Helper function to clean potential extra quotes
   const cleanStringValue = (value: any) => {
     if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
       return value.slice(1, -1);
@@ -69,7 +79,6 @@ api.get('/', async (req, res) => {
     maxDevices: query['maxDevices'] ? Number(query['maxDevices']) : undefined,
   };
 
-  console.log(rawFilter);
   const result = v.safeParse(ScenarioFilterSchema, rawFilter);
 
   if (!result.success) {
