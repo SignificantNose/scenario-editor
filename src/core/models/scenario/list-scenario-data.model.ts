@@ -23,8 +23,8 @@ export type ScenarioData = v.InferOutput<typeof ScenarioDataSchema>;
 export const ScenarioDataSchema = v.object({
   id: v.number(),
   name: v.string(),
-  createdAt: v.nullable(v.pipe(v.string(), v.isoDateTime())),
-  updatedAt: v.nullable(v.pipe(v.string(), v.isoDateTime())),
+  createdAt: v.pipe(v.string(), v.isoDateTime()),
+  updatedAt: v.pipe(v.string(), v.isoDateTime()),
   emitters: v.array(EmitterDataSchema),
   listeners: v.array(ListenerDataSchema),
 });

@@ -80,8 +80,8 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   private _internalScenario: ScenarioData = {
     id: 0,
     name: 'New Scenario',
-    createdAt: null,
-    updatedAt: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     emitters: [],
     listeners: [],
   };

@@ -5,6 +5,78 @@
   </button>
 </mat-toolbar>
 
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>Filters</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <form [formGroup]="filterForm" class="filters">
+    <div class="filter-category">
+      <h4>General</h4>
+      <mat-form-field>
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
+    </div>
+
+    <div class="filter-category">
+      <h4>Created At</h4>
+      <mat-form-field>
+        <mat-label>After</mat-label>
+        <input matInput [matDatepicker]="caPicker" formControlName="createdAfter" />
+        <mat-datepicker-toggle matSuffix [for]="caPicker"></mat-datepicker-toggle>
+        <mat-datepicker #caPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Before</mat-label>
+        <input matInput [matDatepicker]="cbPicker" formControlName="createdBefore" />
+        <mat-datepicker-toggle matSuffix [for]="cbPicker"></mat-datepicker-toggle>
+        <mat-datepicker #cbPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-category">
+      <h4>Updated At</h4>
+      <mat-form-field>
+        <mat-label>After</mat-label>
+        <input matInput [matDatepicker]="uaPicker" formControlName="updatedAfter" />
+        <mat-datepicker-toggle matSuffix [for]="uaPicker"></mat-datepicker-toggle>
+        <mat-datepicker #uaPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Before</mat-label>
+        <input matInput [matDatepicker]="ubPicker" formControlName="updatedBefore" />
+        <mat-datepicker-toggle matSuffix [for]="ubPicker"></mat-datepicker-toggle>
+        <mat-datepicker #ubPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-category">
+      <h4>Devices</h4>
+      <mat-form-field>
+        <mat-label>Min Devices</mat-label>
+        <input matInput type="number" formControlName="minDevices" />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Max Devices</mat-label>
+        <input matInput type="number" formControlName="maxDevices" />
+      </mat-form-field>
+    </div>
+  </form>
+
+  <div class="filter-actions">
+    <button mat-stroked-button color="warn" (click)="resetFilters()">
+      Reset
+    </button>
+    <button mat-raised-button color="primary" (click)="applyFilters()">
+      Apply Filters
+    </button>
+  </div>
+</mat-expansion-panel>
+
 <div *ngIf="loading" class="muted">Loading...</div>
 <div *ngIf="error" class="error">{{ error }}</div>
 
@@ -13,26 +85,14 @@
     <div class="scenario-content">
       <div class="scenario-info">
         <div class="scenario-name">{{ scenario.name }}</div>
-        <div class="scenario-date">
-          {{ scenario.createdAt | date: 'short' }}
-        </div>
+        <div class="scenario-date">{{ scenario.createdAt | date: 'short' }}</div>
       </div>
 
       <div class="scenario-actions">
-        <button
-          mat-icon-button
-          color="primary"
-          (click)="editScenario(scenario.id)"
-        >
-          <!-- aria-label="Edit {{ scenario.name }}" -->
+        <button mat-icon-button color="primary" (click)="editScenario(scenario.id)">
           <mat-icon>edit</mat-icon>
         </button>
-        <button
-          mat-icon-button
-          color="warn"
-          (click)="deleteScenario(scenario.id)"
-        >
-          <!-- aria-label="Delete {{ scenario.name }}" -->
+        <button mat-icon-button color="warn" (click)="deleteScenario(scenario.id)">
           <mat-icon>delete</mat-icon>
         </button>
       </div>

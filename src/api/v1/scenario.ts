@@ -1,5 +1,7 @@
+import * as v from 'valibot';
 import { CreateScenarioDataSchema } from '@models/scenario/create-scenario-data.model';
-import { ListScenarioDataResponse } from '@models/scenario/list-scenario-data.model';
+import { ScenarioFilter, ScenarioFilterSchema } from '@models/scenario/filter.model';
+import { ListScenarioDataResponse, ScenarioData } from '@models/scenario/list-scenario-data.model';
 import { UpdateScenarioDataSchema } from '@models/scenario/update-scenario-data.model';
 import { validateBody } from 'api/middleware/validation';
 import { Router } from 'express';
@@ -9,16 +11,32 @@ let scenarios: ListScenarioDataResponse = [
   {
     id: 1,
     name: 'abc',
-    createdAt: '2011-12-03T10:15:30',
-    updatedAt: '2011-12-03T10:15:30',
+    createdAt: '2025-09-10T10:15:30',
+    updatedAt: '2025-09-11T10:15:30',
     emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 } }],
     listeners: [{ id: 1, position: { x: 1, y: 1, z: 1 } }],
   },
   {
     id: 2,
     name: 'abcd',
-    createdAt: '2011-12-03T10:15:30',
-    updatedAt: '2011-12-03T10:15:30',
+    createdAt: '2025-09-12T10:15:30',
+    updatedAt: '2025-09-13T10:15:30',
+    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 } }],
+    listeners: [{ id: 1, position: { x: 1, y: 1, z: 1 } }],
+  },
+  {
+    id: 3,
+    name: 'abcde',
+    createdAt: '2025-09-14T10:15:30',
+    updatedAt: '2025-09-15T10:15:30',
+    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 } }],
+    listeners: [{ id: 1, position: { x: 1, y: 1, z: 1 } }],
+  },
+  {
+    id: 4,
+    name: 'abcdef',
+    createdAt: '2025-09-16T10:15:30',
+    updatedAt: '2025-09-17T10:15:30',
     emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 } }],
     listeners: [{ id: 1, position: { x: 1, y: 1, z: 1 } }],
   },
@@ -30,9 +48,64 @@ api.post('/', validateBody(CreateScenarioDataSchema), async (req, res) => {
   scenarios.push(scenario);
   res.status(201).json({ message: 'Scenario saved', scenario });
 });
-
 api.get('/', async (req, res) => {
-  res.json(scenarios);
+  const query = req.query;
+
+  // Helper function to clean potential extra quotes
+  const cleanStringValue = (value: any) => {
+    if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+      return value.slice(1, -1);
+    }
+    return value;
+  };
+
+  const rawFilter = {
+    name: cleanStringValue(query['name']),
+    createdAfter: cleanStringValue(query['createdAfter']),
+    createdBefore: cleanStringValue(query['createdBefore']),
+    updatedAfter: cleanStringValue(query['updatedAfter']),
+    updatedBefore: cleanStringValue(query['updatedBefore']),
+    minDevices: query['minDevices'] ? Number(query['minDevices']) : undefined,
+    maxDevices: query['maxDevices'] ? Number(query['maxDevices']) : undefined,
+  };
+
+  console.log(rawFilter);
+  const result = v.safeParse(ScenarioFilterSchema, rawFilter);
+
+  if (!result.success) {
+    return res.status(400).json({ error: 'Invalid filter', details: result.issues });
+  }
+
+  const filter = result.output;
+
+  let filtered = scenarios;
+
+  if (filter.name) {
+    filtered = filtered.filter((s) => s.name.toLowerCase().includes(filter.name!.toLowerCase()));
+  }
+
+  if (filter.createdAfter) {
+    filtered = filtered.filter((s) => new Date(s.createdAt) >= new Date(filter.createdAfter!));
+  }
+  if (filter.createdBefore) {
+    filtered = filtered.filter((s) => new Date(s.createdAt) <= new Date(filter.createdBefore!));
+  }
+
+  if (filter.updatedAfter) {
+    filtered = filtered.filter((s) => new Date(s.updatedAt) >= new Date(filter.updatedAfter!));
+  }
+  if (filter.updatedBefore) {
+    filtered = filtered.filter((s) => new Date(s.updatedAt) <= new Date(filter.updatedBefore!));
+  }
+
+  if (filter.minDevices !== undefined) {
+    filtered = filtered.filter((s) => s.listeners.length + s.emitters.length >= filter.minDevices!);
+  }
+  if (filter.maxDevices !== undefined) {
+    filtered = filtered.filter((s) => s.listeners.length + s.emitters.length <= filter.maxDevices!);
+  }
+
+  return res.json(filtered);
 });
 
 api.get('/:id', async (req, res) => {

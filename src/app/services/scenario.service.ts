@@ -5,15 +5,24 @@ import { ListScenarioDataResponse, ScenarioData } from '@models/scenario/list-sc
 import { CreateScenarioData } from '@models/scenario/create-scenario-data.model';
 import { UpdateScenarioData } from '@models/scenario/update-scenario-data.model';
 import { DeleteScenarioData } from '@models/scenario/delete-scenario-data.model';
+import { ScenarioFilter } from '@models/scenario/filter.model';
 
 @Injectable({ providedIn: 'root' })
 export class ScenarioService {
   private http = inject(HttpClient);
   private base = '/api/v1/scenario';
 
-  list(q = ''): Observable<ListScenarioDataResponse> {
-    const url = q ? `${this.base}?q=${encodeURIComponent(q)}` : this.base;
-    return this.http.get<ListScenarioDataResponse>(url);
+  list(filter: ScenarioFilter | null = null): Observable<ListScenarioDataResponse> {
+    const params: any = {};
+    if (filter) {
+      Object.entries(filter).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params[key] = value;
+        }
+      });
+
+    }
+    return this.http.get<ListScenarioDataResponse>(this.base, { params });
   }
 
   get(id: number | string): Observable<ScenarioData> {
