@@ -1,9 +1,8 @@
 import * as v from 'valibot';
 import {
-  CreateScenarioData,
   CreateScenarioDataSchema,
 } from '@models/scenario/create-scenario-data.model';
-import { ScenarioFilter, ScenarioFilterSchema } from '@models/scenario/filter.model';
+import { ScenarioFilterSchema } from '@models/scenario/filter.model';
 import { ListScenarioDataResponse, ScenarioData } from '@models/scenario/list-scenario-data.model';
 import { UpdateScenarioDataSchema } from '@models/scenario/update-scenario-data.model';
 import { validateBody } from 'api/middleware/validation';
@@ -16,7 +15,7 @@ let scenarios: ListScenarioDataResponse = [
     name: 'abc',
     createdAt: '2025-09-10T10:15:30',
     updatedAt: '2025-09-11T10:15:30',
-    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 } }],
+    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 }, audioFileUri: null }],
     listeners: [{ id: 1, position: { x: 1, y: 1, z: 1 } }],
   },
   {
@@ -24,7 +23,7 @@ let scenarios: ListScenarioDataResponse = [
     name: 'abcd',
     createdAt: '2025-09-12T10:15:30',
     updatedAt: '2025-09-13T10:15:30',
-    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 } }],
+    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 }, audioFileUri: null }],
     listeners: [{ id: 1, position: { x: 1, y: 1, z: 1 } }],
   },
   {
@@ -32,7 +31,7 @@ let scenarios: ListScenarioDataResponse = [
     name: 'abcde',
     createdAt: '2025-09-14T10:15:30',
     updatedAt: '2025-09-15T10:15:30',
-    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 } }],
+    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 }, audioFileUri: null }],
     listeners: [{ id: 1, position: { x: 1, y: 1, z: 1 } }],
   },
   {
@@ -40,7 +39,7 @@ let scenarios: ListScenarioDataResponse = [
     name: 'abcdef',
     createdAt: '2025-09-16T10:15:30',
     updatedAt: '2025-09-17T10:15:30',
-    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 } }],
+    emitters: [{ id: 1, position: { x: 1, y: 1, z: 2 }, audioFileUri: null }],
     listeners: [{ id: 1, position: { x: 1, y: 1, z: 1 } }],
   },
 ];

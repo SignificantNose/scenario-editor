@@ -21,29 +21,40 @@
     </div>
 
     @if (selectedObject) {
-      @if (selectedObject.type === 'listener') {
+      @if (selectedObject.selection.type === 'listener') {
         <div class="info-panel">
           <h3 class="info-panel-title">Selected listener</h3>
-          <p>ID: {{ selectedObject.data.id }}</p>
+          <p>ID: {{ selectedObject.selection.data.id }}</p>
           <p>
-            Position: X: {{ selectedObject.data.position.x.toFixed(2) }}, Y:
-            {{ selectedObject.data.position.y.toFixed(2) }}, Z:
-            {{ selectedObject.data.position.z.toFixed(2) }}
+            Position: X: {{ selectedObject.selection.data.position.x.toFixed(2) }}, Y:
+            {{ selectedObject.selection.data.position.y.toFixed(2) }}, Z:
+            {{ selectedObject.selection.data.position.z.toFixed(2) }}
           </p>
           <button mat-stroked-button color="warn" class="full-width" (click)="deleteSelected()">
             Delete listener
           </button>
         </div>
-      } @else if (selectedObject.type === 'emitter') {
+      } @else if (selectedObject.selection.type === 'emitter') {
         <div class="info-panel">
           <h3 class="info-panel-title">Selected emitter</h3>
-          <p>ID: {{ selectedObject.data.id }}</p>
+          <p>ID: {{ selectedObject.selection.data.id }}</p>
           <p>
-            Position: X: {{ selectedObject.data.position.x.toFixed(2) }}, Y:
-            {{ selectedObject.data.position.y.toFixed(2) }}, Z:
-            {{ selectedObject.data.position.z.toFixed(2) }}
+            Position: X: {{ selectedObject.selection.data.position.x.toFixed(2) }}, Y:
+            {{ selectedObject.selection.data.position.y.toFixed(2) }}, Z:
+            {{ selectedObject.selection.data.position.z.toFixed(2) }}
           </p>
-          <p>upload file</p>
+
+          <p>Upload or select audio:</p>
+          <input
+            type="file"
+            accept="audio/*"
+            (change)="onAudioSelected($event, selectedObject.selection.data)"
+          />
+
+          @if (selectedObject.selection.data.audioFileUri) {
+            <p>Audio file: {{ selectedObject.selection.data.audioFileUri }}</p>
+            <!-- <audio controls [src]="selectedObject.data.audioUrl"></audio> -->
+          }
           <button mat-stroked-button color="warn" class="full-width" (click)="deleteSelected()">
             Delete emitter
           </button>

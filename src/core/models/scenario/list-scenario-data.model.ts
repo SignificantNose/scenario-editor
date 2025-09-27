@@ -9,15 +9,15 @@ export const PositionDataSchema = v.object({
 export type EmitterData = v.InferOutput<typeof EmitterDataSchema>;
 export const EmitterDataSchema = v.object({
   id: v.number(),
-  position: PositionDataSchema
+  position: PositionDataSchema,
+  audioFileUri: v.nullable(v.string()),
 });
 
 export type ListenerData = v.InferOutput<typeof ListenerDataSchema>;
 export const ListenerDataSchema = v.object({
   id: v.number(),
-  position: PositionDataSchema
+  position: PositionDataSchema,
 });
-
 
 export type ScenarioData = v.InferOutput<typeof ScenarioDataSchema>;
 export const ScenarioDataSchema = v.object({

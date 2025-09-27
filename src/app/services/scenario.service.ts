@@ -10,7 +10,7 @@ import { ScenarioFilter } from '@models/scenario/filter.model';
 @Injectable({ providedIn: 'root' })
 export class ScenarioService {
   private http = inject(HttpClient);
-  private base = '/api/v1/scenario';
+  private controller = '/api/v1/scenario';
 
   list(filter: ScenarioFilter | null = null): Observable<ListScenarioDataResponse> {
     const params: any = {};
@@ -22,22 +22,22 @@ export class ScenarioService {
       });
 
     }
-    return this.http.get<ListScenarioDataResponse>(this.base, { params });
+    return this.http.get<ListScenarioDataResponse>(this.controller, { params });
   }
 
   get(id: number | string): Observable<ScenarioData> {
-    return this.http.get<ScenarioData>(`${this.base}/${id}`);
+    return this.http.get<ScenarioData>(`${this.controller}/${id}`);
   }
 
   create(data: CreateScenarioData): Observable<ScenarioData> {
-    return this.http.post<ScenarioData>(this.base, data);
+    return this.http.post<ScenarioData>(this.controller, data);
   }
 
   update(id: number | string, data: UpdateScenarioData): Observable<ScenarioData> {
-    return this.http.put<ScenarioData>(`${this.base}/${id}`, data);
+    return this.http.put<ScenarioData>(`${this.controller}/${id}`, data);
   }
 
   delete(data: DeleteScenarioData): Observable<void> {
-    return this.http.request<void>('delete', `${this.base}/${data.id}`);
+    return this.http.request<void>('delete', `${this.controller}/${data.id}`);
   }
 }

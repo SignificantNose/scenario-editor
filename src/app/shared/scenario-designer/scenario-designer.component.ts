@@ -26,11 +26,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Subject, takeUntil } from 'rxjs';
+import { AudioFileService } from '@services/audio-file.service';
 
 interface SelectedObject {
   mesh: THREE.Mesh;
-  type: 'emitter' | 'listener';
-  data: EmitterData | ListenerData;
+  selection:
+    | {
+        type: 'emitter';
+        data: EmitterData;
+      }
+    | {
+        type: 'listener';
+        data: ListenerData;
+      };
 }
 
 @Component({
@@ -104,7 +112,8 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private ngZone: NgZone,
-  ) { }
+    private audioFileService: AudioFileService,
+  ) {}
 
   ngOnInit() {
     this.form.patchValue({ name: this._internalScenario.name });
@@ -154,6 +163,33 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this.$destroy.complete();
     window.removeEventListener('mouseup', (e) => this.onMouseUp(e));
     window.removeEventListener('resize', () => this.onResize());
+  }
+
+  onAudioSelected(event: Event, emitter: EmitterData) {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) {
+      return;
+    }
+
+    const file = input.files[0];
+    if (!file.type.startsWith('audio/')) {
+      alert('Please select an audio file');
+      return;
+    }
+
+    this.audioFileService.uploadAudio(file).subscribe({
+      next: (result) => {
+        emitter.audioFileUri = result.uri;
+      },
+      error: (err) => {
+        console.error('Upload failed', err);
+        alert('File upload failed');
+      },
+    });
   }
 
   public getScenario(): ScenarioData {
@@ -312,7 +348,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
           ? this._internalScenario.emitters.find((e) => e.id === id)!
           : this._internalScenario.listeners.find((l) => l.id === id)!;
 
-      this.selectedObject = { mesh, type, data };
+      this.selectedObject = { mesh, selection: { type, data } };
       return true;
     } else {
       this.clearSelectedObject();
@@ -354,7 +390,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   public addEmitter() {
     if (!this.preObjectPosition || !this.scene) return;
     const id = this.generateId();
-    const emitter: EmitterData = { id, position: { ...this.preObjectPosition } }; // removed file
+    const emitter: EmitterData = { id, position: { ...this.preObjectPosition }, audioFileUri: null };
     this._internalScenario.emitters.push(emitter);
 
     const mesh = new THREE.Mesh(
@@ -398,7 +434,8 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   public deleteSelected() {
     if (!this.selectedObject || !this.scene) return;
 
-    const { mesh, type, data } = this.selectedObject;
+    const { mesh, selection } = this.selectedObject;
+    const { type, data } = selection;
 
     if (type === 'emitter') {
       this.scene.remove(mesh);
@@ -416,7 +453,6 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
 
     this.clearSelectedObject();
   }
-
 
   private generateId(): number {
     return this.nextId++;
