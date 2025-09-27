@@ -37,24 +37,34 @@
       } @else if (selectedObject.selection.type === 'emitter') {
         <div class="info-panel">
           <h3 class="info-panel-title">Selected emitter</h3>
-          <p>ID: {{ selectedObject.selection.data.id }}</p>
-          <p>
+
+          <p class="info-panel-text">ID: {{ selectedObject.selection.data.id }}</p>
+          <p class="info-panel-text">
             Position: X: {{ selectedObject.selection.data.position.x.toFixed(2) }}, Y:
             {{ selectedObject.selection.data.position.y.toFixed(2) }}, Z:
             {{ selectedObject.selection.data.position.z.toFixed(2) }}
           </p>
 
-          <p>Upload or select audio:</p>
-          <input
-            type="file"
-            accept="audio/*"
-            (change)="onAudioSelected($event, selectedObject.selection.data)"
-          />
+          <mat-form-field appearance="fill" class="full-width file-upload-field">
+            <mat-label>Audio File</mat-label>
+            <input
+              type="file"
+              accept="audio/*"
+              (change)="onAudioSelected($event, selectedObject.selection.data)"
+              hidden
+              #fileInput
+            />
+            <input
+              matInput
+              [readonly]="true"
+              placeholder="No file selected"
+              [value]="selectedObject.selection.data.audioFileUri || ''"
+            />
+            <button mat-icon-button matSuffix (click)="fileInput.click()" type="button">
+              <mat-icon>upload_file</mat-icon>
+            </button>
+          </mat-form-field>
 
-          @if (selectedObject.selection.data.audioFileUri) {
-            <p>Audio file: {{ selectedObject.selection.data.audioFileUri }}</p>
-            <!-- <audio controls [src]="selectedObject.data.audioUrl"></audio> -->
-          }
           <button mat-stroked-button color="warn" class="full-width" (click)="deleteSelected()">
             Delete emitter
           </button>
