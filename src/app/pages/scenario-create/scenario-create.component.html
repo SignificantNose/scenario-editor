@@ -2,8 +2,9 @@
   <mat-toolbar color="primary" class="create-header">
     <span class="create-title">Create Scenario</span>
     <span class="spacer"></span>
-    <button mat-stroked-button color="accent" (click)="cancel()">Cancel</button>
+    <button class="create-button" mat-stroked-button color="accent" (click)="cancel()">Cancel</button>
     <button
+      class="create-button"
       mat-flat-button
       color="accent"
       [disabled]="!designer.isValid"
@@ -14,9 +15,6 @@
   </mat-toolbar>
 
   <div class="create-main">
-    <app-scenario-designer
-      class="designer"
-      #designer
-    ></app-scenario-designer>
+    <app-scenario-designer class="designer" #designer></app-scenario-designer>
   </div>
 </div>

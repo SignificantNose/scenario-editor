@@ -1,34 +1,31 @@
-<mat-toolbar class="scenario-list-header">
+<mat-toolbar color="primary" class="scenario-list-header">
   <span class="scenario-list-title">Scenarios</span>
-  <button mat-raised-button color="primary" (click)="createScenario()">
-    Create Scenario
-  </button>
+  <button mat-raised-button color="accent" (click)="createScenario()">Create Scenario</button>
 </mat-toolbar>
 
-<mat-expansion-panel>
+<mat-expansion-panel class="filters-panel">
   <mat-expansion-panel-header>
     <mat-panel-title>Filters</mat-panel-title>
   </mat-expansion-panel-header>
 
-  <form [formGroup]="filterForm" class="filters">
-    <div class="filter-category">
-      <h4>General</h4>
-      <mat-form-field>
+  <form [formGroup]="filterForm" class="filters-form">
+    <div class="filter-category general">
+      <h4 class="filter-title">General</h4>
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Name</mat-label>
         <input matInput formControlName="name" />
       </mat-form-field>
     </div>
 
-    <div class="filter-category">
-      <h4>Created At</h4>
-      <mat-form-field>
+    <div class="filter-category created-at">
+      <h4 class="filter-title">Created At</h4>
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>After</mat-label>
         <input matInput [matDatepicker]="caPicker" formControlName="createdAfter" />
         <mat-datepicker-toggle matSuffix [for]="caPicker"></mat-datepicker-toggle>
         <mat-datepicker #caPicker></mat-datepicker>
       </mat-form-field>
-
-      <mat-form-field>
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Before</mat-label>
         <input matInput [matDatepicker]="cbPicker" formControlName="createdBefore" />
         <mat-datepicker-toggle matSuffix [for]="cbPicker"></mat-datepicker-toggle>
@@ -36,16 +33,15 @@
       </mat-form-field>
     </div>
 
-    <div class="filter-category">
-      <h4>Updated At</h4>
-      <mat-form-field>
+    <div class="filter-category updated-at">
+      <h4 class="filter-title">Updated At</h4>
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>After</mat-label>
         <input matInput [matDatepicker]="uaPicker" formControlName="updatedAfter" />
         <mat-datepicker-toggle matSuffix [for]="uaPicker"></mat-datepicker-toggle>
         <mat-datepicker #uaPicker></mat-datepicker>
       </mat-form-field>
-
-      <mat-form-field>
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Before</mat-label>
         <input matInput [matDatepicker]="ubPicker" formControlName="updatedBefore" />
         <mat-datepicker-toggle matSuffix [for]="ubPicker"></mat-datepicker-toggle>
@@ -53,14 +49,13 @@
       </mat-form-field>
     </div>
 
-    <div class="filter-category">
-      <h4>Devices</h4>
-      <mat-form-field>
+    <div class="filter-category devices">
+      <h4 class="filter-title">Devices</h4>
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Min Devices</mat-label>
         <input matInput type="number" formControlName="minDevices" />
       </mat-form-field>
-
-      <mat-form-field>
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Max Devices</mat-label>
         <input matInput type="number" formControlName="maxDevices" />
       </mat-form-field>
@@ -68,38 +63,36 @@
   </form>
 
   <div class="filter-actions">
-    <button mat-stroked-button color="warn" (click)="resetFilters()">
-      Reset
-    </button>
-    <button mat-raised-button color="primary" (click)="applyFilters()">
-      Apply Filters
-    </button>
+    <button mat-stroked-button color="warn" (click)="resetFilters()">Reset</button>
+    <button mat-raised-button color="primary" (click)="applyFilters()">Apply Filters</button>
   </div>
 </mat-expansion-panel>
 
-<div *ngIf="loading" class="muted">Loading...</div>
-<div *ngIf="error" class="error">{{ error }}</div>
-
-<div class="scenario-list" *ngIf="!loading && !error">
-  <mat-card class="scenario-card" *ngFor="let scenario of scenarios">
-    <div class="scenario-content">
-      <div class="scenario-info">
-        <div class="scenario-name">{{ scenario.name }}</div>
-        <div class="scenario-date">{{ scenario.createdAt | date: 'short' }}</div>
+@if (loading) {
+  <div class="muted-text">Loading...</div>
+} @else if (error) {
+  <div class="error-text">{{ error }}</div>
+} @else {
+  <div class="scenario-list" *ngIf="!loading && !error">
+    <mat-card class="scenario-card" *ngFor="let scenario of scenarios">
+      <div class="scenario-content">
+        <div class="scenario-info">
+          <div class="scenario-name">{{ scenario.name }}</div>
+          <div class="scenario-date">Updated at: {{ scenario.updatedAt | date: 'medium' }}</div>
+          <div class="scenario-stats">
+            Emitters: {{ scenario.emitters.length }}, Listeners: {{ scenario.listeners.length }}
+          </div>
+        </div>
+        <div class="scenario-actions">
+          <button mat-icon-button color="primary" (click)="editScenario(scenario.id)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteScenario(scenario.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </div>
-
-      <div class="scenario-actions">
-        <button mat-icon-button color="primary" (click)="editScenario(scenario.id)">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button color="warn" (click)="deleteScenario(scenario.id)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
-    </div>
-  </mat-card>
-
-  <div *ngIf="scenarios.length === 0" class="muted">
-    No scenarios found
+    </mat-card>
+    <div *ngIf="scenarios.length === 0" class="muted-text">No scenarios found</div>
   </div>
-</div>
+}

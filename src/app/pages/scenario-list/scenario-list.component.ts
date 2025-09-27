@@ -20,7 +20,6 @@ import { ScenarioData } from '@models/scenario/list-scenario-data.model';
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     FormsModule,
     ReactiveFormsModule,
     MatToolbarModule,

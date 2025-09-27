@@ -1,24 +1,25 @@
-<div class="editor-container" *ngIf="scenario">
-  <mat-toolbar color="primary" class="editor-header">
-    <span class="editor-title">Edit Scenario</span>
-    <span class="spacer"></span>
-    <button mat-stroked-button color="accent" (click)="cancel()">Cancel</button>
-    <button
-      mat-flat-button
-      color="accent"
-      [disabled]="!scenarioDesigner?.isValid"
-      (click)="saveChanges()"
-    >
-      Save Changes
-    </button>
-  </mat-toolbar>
+@if(!scenario) {
+  <div class="loading-text">Loading scenario...</div>
+}
+@else {
+  <div class="editor-container">
+    <mat-toolbar color="primary" class="editor-header">
+      <span class="editor-title">Edit Scenario</span>
+      <span class="spacer"></span>
+      <button class="editor-button" mat-stroked-button color="accent" (click)="cancel()">Cancel</button>
+      <button
+        class="editor-button"
+        mat-flat-button
+        color="accent"
+        [disabled]="!scenarioDesigner?.isValid"
+        (click)="saveChanges()"
+      >
+        Save Changes
+      </button>
+    </mat-toolbar>
 
-  <div class="editor-main">
-    <app-scenario-designer
-      class="designer"
-      [scenario]="scenario"
-      #designer
-    ></app-scenario-designer>
+    <div class="editor-main">
+      <app-scenario-designer class="designer" [scenario]="scenario" #designer></app-scenario-designer>
+    </div>
   </div>
-</div>
-<div *ngIf="!scenario">Loading scenario...</div>
+}
