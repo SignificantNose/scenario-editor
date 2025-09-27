@@ -1,13 +1,17 @@
 .app-header {
-  background-color: var(--bg-header, #3B4252);
-  padding: 0.75rem 1.5rem;
   display: flex;
   align-items: center;
-  height: 50px;
+  justify-content: space-between;
+  background-color: var(--mat-color-primary);
+  color: var(--mat-color-on-primary);
+  padding: 0.75rem 1.5rem;
+  height: 64px;
+  box-sizing: border-box;
+  z-index: 1000;
 }
 
 .app-header-title {
-  color: var(--text-header, #ECEFF4);
+  color: inherit;
   font-size: 1.8rem;
   font-weight: 500;
   text-decoration: none;
@@ -15,11 +19,33 @@
 }
 
 .app-header-title:hover {
-  color: #88C0D0;
+  color: var(--mat-color-accent);
+}
+
+.app-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.app-nav-link {
+  color: inherit;
+  font-weight: 500;
+  font-size: 1.2rem;
+  text-decoration: none;
+  line-height: 1;
+  display: inline-block;
+  transition: color 0.2s ease-in-out;
+}
+
+.app-nav-link:hover {
+  color: var(--mat-color-accent);
 }
 
 .app-main {
   padding: 2rem;
+  background-color: var(--mat-color-background);
+  min-height: calc(100vh - 64px);
 }
 
 .app-main-content {
