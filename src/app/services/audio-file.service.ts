@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AudioFileService {
   private http = inject(HttpClient);
-  private controller = '/api/v1/audio';
+  private controller = 'http://localhost:4000/api/v1/audio';
 
   uploadAudio(file: File): Observable<{ uri: string }> {
     const formData = new FormData();

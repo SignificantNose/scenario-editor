@@ -10,7 +10,7 @@ import { ScenarioFilter } from '@models/scenario/filter.model';
 @Injectable({ providedIn: 'root' })
 export class ScenarioService {
   private http = inject(HttpClient);
-  private controller = '/api/v1/scenario';
+  private controller = 'http://localhost:4000/api/v1/scenario';
 
   list(filter: ScenarioFilter | null = null): Observable<ListScenarioDataResponse> {
     const params: any = {};
