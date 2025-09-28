@@ -1,11 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AppConfigService } from './app-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class AudioFileService {
-  private http = inject(HttpClient);
-  private controller = 'http://localhost:4000/api/v1/audio';
+  private appConfigService = inject(AppConfigService);
+  private controller = `${this.appConfigService.config?.apiUrl ?? ''}/api/v1/audio`;
+
+  constructor(private http: HttpClient) { }
 
   uploadAudio(file: File): Observable<{ uri: string }> {
     const formData = new FormData();

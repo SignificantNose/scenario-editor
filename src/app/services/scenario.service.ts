@@ -6,11 +6,14 @@ import { CreateScenarioData } from '@models/scenario/create-scenario-data.model'
 import { UpdateScenarioData } from '@models/scenario/update-scenario-data.model';
 import { DeleteScenarioData } from '@models/scenario/delete-scenario-data.model';
 import { ScenarioFilter } from '@models/scenario/filter.model';
+import { AppConfigService } from './app-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class ScenarioService {
-  private http = inject(HttpClient);
-  private controller = 'http://localhost:4000/api/v1/scenario';
+  private appConfigService = inject(AppConfigService);
+  private controller = `${this.appConfigService.config?.apiUrl ?? ''}/api/v1/scenario`;
+
+  constructor(private http: HttpClient) { }
 
   list(filter: ScenarioFilter | null = null): Observable<ListScenarioDataResponse> {
     const params: any = {};
