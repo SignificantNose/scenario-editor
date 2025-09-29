@@ -3,14 +3,11 @@ import {
   ElementRef,
   ViewChild,
   AfterViewInit,
-  Inject,
-  PLATFORM_ID,
   NgZone,
   Input,
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import * as THREE from 'three';
 import { ScenarioData, EmitterData, ListenerData } from '@models/scenario/list-scenario-data.model';
 import {
@@ -32,14 +29,14 @@ import { MatIconModule } from '@angular/material/icon';
 interface SelectedObject {
   mesh: THREE.Mesh;
   selection:
-    | {
-        type: 'emitter';
-        data: EmitterData;
-      }
-    | {
-        type: 'listener';
-        data: ListenerData;
-      };
+  | {
+    type: 'emitter';
+    data: EmitterData;
+  }
+  | {
+    type: 'listener';
+    data: ListenerData;
+  };
 }
 
 @Component({
@@ -112,21 +109,25 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   public selectedObject: SelectedObject | null = null;
 
   constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
     private ngZone: NgZone,
     private audioFileService: AudioFileService,
-  ) {}
+  ) { }
 
   ngOnInit() {
-    this.form.patchValue({ name: this._internalScenario.name });
     this.isValid = this.form.valid;
     this.form.statusChanges.pipe(takeUntil(this.$destroy)).subscribe(() => {
       this.isValid = this.form.valid;
     });
+    // todo: fix this the proper way, rethink logic of the application
+    setTimeout(
+      () => {
+        this.form.patchValue({ name: this._internalScenario.name });
+      }
+    );
   }
 
   ngAfterViewInit(): void {
-    if (!isPlatformBrowser(this.platformId) || !this.canvasRef) return;
+    if (!this.canvasRef) { return; }
 
     const canvas = this.canvasRef.nativeElement;
     this.scene = new THREE.Scene();
@@ -168,10 +169,6 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   onAudioSelected(event: Event, emitter: EmitterData) {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
-
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) {
       return;
