@@ -79,8 +79,8 @@ export class AuthComponent implements OnInit, OnDestroy {
       });
   }
 
-  goToRegister() {
-    this.router.navigate([`/${RoutePaths.Register}`]);
+  goToSignUp() {
+    this.router.navigate([`/${RoutePaths.SignUp}`]);
   }
 }
 

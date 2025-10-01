@@ -25,8 +25,8 @@ export class AuthApiService {
     return this.apiService.get<{ id: number; login: string }>(`${this.controller}/me`);
   }
 
-  register(data: AuthRequest) {
-    return this.apiService.post(`${this.controller}/register`, data);
+  signUp(data: AuthRequest) {
+    return this.apiService.post(`${this.controller}/sign-up`, data);
   }
 }
 

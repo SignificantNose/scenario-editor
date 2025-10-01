@@ -9,9 +9,9 @@ export const routes: Routes = [
     loadComponent: () => import('@pages/auth/auth.component').then((m) => m.AuthComponent),
   },
   {
-    path: RoutePaths.Register,
+    path: RoutePaths.SignUp,
     title: 'Регистрация',
-    loadComponent: () => import('@pages/register/register.component').then((m) => m.RegisterComponent),
+    loadComponent: () => import('@pages/sign-up/sign-up.component').then((m) => m.SignUpComponent),
   },
   {
     path: RoutePaths.Empty,

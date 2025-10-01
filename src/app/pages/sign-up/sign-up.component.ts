@@ -13,7 +13,7 @@ import { AuthApiService } from 'core/services/auth/auth-api.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-sign-up',
   standalone: true,
   imports: [
     CommonModule,
@@ -26,10 +26,10 @@ import { Subject, takeUntil } from 'rxjs';
     MatIconModule,
     MatSnackBarModule
   ],
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss'],
+  templateUrl: './sign-up.component.html',
+  styleUrls: ['./sign-up.component.scss'],
 })
-export class RegisterComponent implements OnDestroy {
+export class SignUpComponent implements OnDestroy {
   hidePassword = true;
   loading = false;
   private destroy$ = new Subject();
@@ -47,22 +47,22 @@ export class RegisterComponent implements OnDestroy {
     this.destroy$.complete();
   }
 
-  register() {
+  signUp() {
     const { login, password } = this.form.value;
     if (!login || !password) return;
 
     this.loading = true;
-    this.authApi.register({ login, password })
+    this.authApi.signUp({ login, password })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.loading = false;
-          this.snackBar.open('Registration successful!', 'Close', { duration: 5000 });
+          this.snackBar.open('Signed up successfully!', 'Close', { duration: 5000 });
           this.router.navigate(['/auth']);
         },
         error: (err) => {
           this.loading = false;
-          const msg = err.error?.error || 'Registration failed';
+          const msg = err.error?.error || 'Sign up failed';
           this.snackBar.open(msg, 'Close', { duration: 5000 });
         }
       });

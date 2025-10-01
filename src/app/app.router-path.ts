@@ -4,7 +4,7 @@ export enum RoutePaths {
   NotFound = '404',
 
   Auth = 'auth',
-  Register = 'register',
+  SignUp = 'sign-up',
 
   NewScenario = 'editor/new',
   EditScenario = 'editor/:id',
