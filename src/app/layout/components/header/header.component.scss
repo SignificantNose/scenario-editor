@@ -1,0 +1,50 @@
+.app-header {
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  min-height: 64px;
+  box-sizing: border-box;
+
+  background: var(--mat-color-primary);
+  color: var(--mat-color-on-primary);
+}
+
+.app-header-title {
+  color: inherit;
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.app-nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.app-nav-link {
+  color: inherit;
+  font-weight: 500;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.app-nav-link:hover {
+  color: var(--mat-color-accent);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.app-logout {
+  color: inherit;
+  font-weight: 500;
+  font-size: 1.1rem;
+  text-transform: none;
+}
+
+.app-logout:hover {
+  color: var(--mat-color-accent);
+}

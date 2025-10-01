@@ -23,8 +23,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Subject, takeUntil } from 'rxjs';
-import { AudioFileService } from '@services/audio-file.service';
 import { MatIconModule } from '@angular/material/icon';
+import { AudioFileService } from 'core/services/audio/audio-file.service';
 
 interface SelectedObject {
   mesh: THREE.Mesh;

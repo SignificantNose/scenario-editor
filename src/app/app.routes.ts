@@ -1,18 +1,22 @@
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { HomeComponent } from './pages/home/home.component';
-import { ScenarioEditComponent } from '@pages/scenario-edit/scenario-edit.component';
-import { ScenarioCreateComponent } from '@pages/scenario-create/scenario-create.component';
+import { Routes } from '@angular/router';
+import { RoutePaths } from './app.router-path';
+import { authGuard } from 'core/guards/auth.guard';
 
-export const routes = [
-  { path: '', component: HomeComponent },
-  { path: 'editor/new', component: ScenarioCreateComponent },
-  { path: 'editor/:id', component: ScenarioEditComponent },
-  { path: '**', redirectTo: '' }
+export const routes: Routes = [
+  {
+    path: RoutePaths.Auth,
+    title: 'Авторизация',
+    loadComponent: () => import('@pages/auth/auth.component').then((m) => m.AuthComponent),
+  },
+  {
+    path: RoutePaths.Register,
+    title: 'Регистрация',
+    loadComponent: () => import('@pages/register/register.component').then((m) => m.RegisterComponent),
+  },
+  {
+    path: RoutePaths.Empty,
+    title: 'Главная',
+    canActivate: [authGuard],
+    loadChildren: () => import('./layout/layout.routes').then((mod) => mod.LayoutRoutes),
+  },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}

@@ -7,7 +7,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { ScenarioData } from '@models/scenario/list-scenario-data.model';
-import { ScenarioService } from '@services/scenario.service';
+import { ScenarioService } from 'core/services/scenario/scenario.service';
 
 @Component({
   selector: 'app-scenario-edit',

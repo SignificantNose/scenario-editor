@@ -1,0 +1,11 @@
+<mat-toolbar color="primary" class="app-header">
+  <a routerLink="/" class="app-header-title">{{ title() }}</a>
+
+  <span class="spacer"></span>
+
+  <nav class="app-nav">
+    <a routerLink="/" class="app-nav-link">List all</a>
+    <a routerLink="/editor/new" class="app-nav-link">Create new</a>
+    <button mat-button class="app-logout" (click)="onLogout()">Logout</button>
+  </nav>
+</mat-toolbar>

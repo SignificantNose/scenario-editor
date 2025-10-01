@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AppConfigModel } from '@models/config/app-config.model';
 
 import { BehaviorSubject, tap } from 'rxjs';
+import { ApiService } from '../api/api.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,15 +16,14 @@ export class AppConfigService {
   }
 
   constructor(
-    private httpClient: HttpClient,
+    private api: ApiService
   ) { }
 
   setConfig() {
-    return this.httpClient.get('assets/config/config.json').pipe(
-      tap((config: AppConfigModel) => {
+    return this.api.get<AppConfigModel>('assets/config/config.json').pipe(
+      tap((config) => {
         this._config$.next(config);
       }),
     );
   }
 }
-

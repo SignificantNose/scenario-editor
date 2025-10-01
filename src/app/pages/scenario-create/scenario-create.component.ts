@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { ScenarioDesignerComponent } from '@shared/scenario-designer/scenario-designer.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { ScenarioService } from '@services/scenario.service';
+import { ScenarioService } from 'core/services/scenario/scenario.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

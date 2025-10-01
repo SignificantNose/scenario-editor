@@ -1,0 +1,44 @@
+<div class="auth-page">
+
+  <mat-card class="auth-card">
+    <h2 class="auth-title">Create Account</h2>
+
+    <form [formGroup]="form" class="auth-form">
+      <mat-form-field appearance="fill" class="auth-field">
+        <mat-label>Login</mat-label>
+        <input matInput formControlName="login" />
+        <mat-error *ngIf="form.get('login')?.invalid">Enter login</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="auth-field">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          formControlName="password"
+          [type]="hidePassword ? 'password' : 'text'"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          [attr.aria-label]="'Toggle password visibility'"
+          [attr.aria-pressed]="!hidePassword"
+        >
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="form.get('password')?.invalid">Enter password (min 4 chars)</mat-error>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="auth-button"
+        (click)="register()"
+        [disabled]="form.invalid || loading"
+      >
+        Register
+      </button>
+    </form>
+  </mat-card>
+</div>
+

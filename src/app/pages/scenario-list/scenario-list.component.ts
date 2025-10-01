@@ -12,7 +12,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 
-import { ScenarioService } from '@services/scenario.service';
+import { ScenarioService } from 'core/services/scenario/scenario.service';
 import { ScenarioData } from '@models/scenario/list-scenario-data.model';
 
 @Component({
