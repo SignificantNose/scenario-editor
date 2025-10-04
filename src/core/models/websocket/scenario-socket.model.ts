@@ -1,23 +1,10 @@
-export interface Emitter {
-  id: number;
-  x: number;
-  y: number;
-  z: number;
-  audioFileUri: string | null;
-}
-
-export interface Listener {
-  id: number;
-  x: number;
-  y: number;
-  z: number;
-}
+import { EmitterData, ListenerData } from "@models/scenario/list-scenario-data.model";
 
 export interface ScenarioState {
   id: number;
   name: string;
-  emitters: Emitter[];
-  listeners: Listener[];
+  emitters: EmitterData[];
+  listeners: ListenerData[];
 }
 
 export interface WsScenarioMessage {

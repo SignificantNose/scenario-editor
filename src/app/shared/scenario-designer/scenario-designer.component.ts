@@ -27,7 +27,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { AudioFileService } from 'core/services/audio/audio-file.service';
 import { ScenarioSocketService } from 'core/services/websocket/scenario-socket.service';
 import { ScenarioState, WsScenarioMessage } from '@models/websocket/scenario-socket.model';
-import { listenerCount } from 'process';
 
 interface SelectedObject {
   mesh: THREE.Mesh;
@@ -69,15 +68,8 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
           name: scenario.name,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          emitters: scenario.emitters.map(e => ({
-            id: e.id,
-            position: { x: e.x, y: e.y, z: e.z },
-            audioFileUri: e.audioFileUri,
-          })),
-          listeners: scenario.listeners.map(l => ({
-            id: l.id,
-            position: { x: l.x, y: l.y, z: l.z },
-          })),
+          emitters: scenario.emitters,
+          listeners: scenario.listeners
         };
 
         this.loadMeshes();
@@ -387,13 +379,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     if (this.preObjectMesh) this.scene.remove(this.preObjectMesh);
     this.preObjectMesh = null;
     this.preObjectPosition = null;
-    if (this._internalScenario.id) this.wsService.sendUpdate(this._internalScenario.id, 'addEmitter', {
-      id: emitter.id,
-      x: emitter.position.x,
-      y: emitter.position.y,
-      z: emitter.position.z,
-      audioFileUri: emitter.audioFileUri
-    });
+    if (this._internalScenario.id) this.wsService.sendUpdate(this._internalScenario.id, 'addEmitter', emitter);
   }
 
   private addEmitterFromRemote(emitter: EmitterData) {
@@ -435,12 +421,7 @@ export class ScenarioDesignerComponent implements OnInit, AfterViewInit, OnDestr
     this.preObjectMesh = null;
     this.preObjectPosition = null;
     if (this._internalScenario.id) this.wsService.sendUpdate(this._internalScenario.id, 'addListener',
-      {
-        id: listener.id,
-        x: listener.position.x,
-        y: listener.position.y,
-        z: listener.position.z,
-      }
+      listener
     );
   }
 
